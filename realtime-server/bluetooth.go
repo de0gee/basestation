@@ -20,6 +20,10 @@ func ConnectToBluetooth(address string) (err error) {
 	script := strings.Replace(`
 service bluetooth start
 echo "power on" | bluetoothctl
+echo "agent on" | bluetoothctl
+echo "scan on" | bluetoothctl
+sleep 2
+echo "scan off" | bluetoothctl
 echo "pair XX" | bluetoothctl
 echo "trust XX" | bluetoothctl
 echo "connect XX" | bluetoothctl
