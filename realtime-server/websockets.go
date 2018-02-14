@@ -45,7 +45,8 @@ func wshandler(c *gin.Context) {
 		return
 	}
 	ws.Lock()
-	id := fmt.Sprintf("%s", uuid.NewV4())
+	uuid4, _ := uuid.NewV4()
+	id := fmt.Sprintf("%s", uuid4)
 	log.Infof("add connection %s", id)
 	ws.connections[id] = conn
 	ws.Unlock()
