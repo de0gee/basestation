@@ -20,6 +20,12 @@ echo "trust 00:0B:57:1B:8C:77" | sudo bluetoothctl
 echo "connect 00:0B:57:1B:8C:77" | sudo bluetoothctl
 ```
 
+# Discover services 
+
+```
+$ gattctl --connect 00:0B:57:1B:8C:77
+```
+
 # Disconnect
 
 ```
@@ -48,7 +54,7 @@ sourceId=org.bluetooth.service.device_information
 uuid = 180A
     Characteristic 1: [Manufacturer Name String]
     sourceId = org.bluetooth.characteristic.manufacturer_name_string
-    uuid = 2A29
+    uuid = 00002a29-0000-1000-8000-00805f9b34fb
     value type =  utf-8
     length (bytes) = 3
 
@@ -84,7 +90,7 @@ sourceId=custom.type
 uuid = c355c42e-b56c-458e-bacb-9248717bbac2
     Characteristic 1: [Temperature]
     sourceId = org.bluetooth.characteristic.temperature
-    uuid = 2A6E
+    uuid = 00002a6e-0000-1000-8000-00805f9b34fb
     value type =  int16_t
     length (bytes) = 2
 
