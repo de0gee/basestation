@@ -13,6 +13,7 @@ hci0 type 7 discovering off
 # Connect to device
 
 ```
+sudo service bluetooth start
 echo "power on" | sudo bluetoothctl
 echo "pair 00:0B:57:1B:8C:77" | sudo bluetoothctl
 echo "trust 00:0B:57:1B:8C:77" | sudo bluetoothctl
@@ -29,10 +30,11 @@ echo "disconnect 00:0B:57:1B:8C:77" | sudo bluetoothctl
 
 Script basis: https://github.com/schollz/gatt-python
 
-
 ```
+sudo apt-get install pi-bluetooth # pi only
+sudo apt-get install --no-install-recommends bluetooth
+sudo apt-get install python3-dbus python3-pip
 sudo python3 -m pip install gatt
-sudo apt-get install python3-dbus
 python3 run.py
 ```
 
