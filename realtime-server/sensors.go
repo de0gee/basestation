@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/binary"
 	"encoding/json"
-	"time"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/muka/go-bluetooth/bluez/profile"
@@ -14,9 +13,32 @@ import (
 	"github.com/muka/go-bluetooth/api"
 )
 
+// Define characteristics
+var characteristicDefinitions = map[string]CharacteristicDefinition{
+	"00002a6e-0000-1000-8000-00805f9b34fb": CharacteristicDefinition{
+		Name: "temperature", ValueType: "uint16_t", ID: 0,
+	},
+	"00002a6f-0000-1000-8000-00805f9b34fb": CharacteristicDefinition{
+		Name: "humidity", ValueType: "uint8_t", ID: 1,
+	},
+	"c24229aa-d7e4-4438-a328-c2c548564643": CharacteristicDefinition{
+		Name: "ambient_light", ValueType: "uint32_t", ID: 2,
+	},
+	// "61bf1164-529c-4140-9c61-3f5e4fb4c0c1": CharacteristicDefinition{
+	// 	Name: "uv_light", ValueType: "uint32_t",
+	// },
+	"2f256c42-cdef-4378-8e78-694ea0f53ea8": CharacteristicDefinition{
+		Name: "pressure", ValueType: "uint16_t", ID: 3,
+	},
+	"15e438b8-558e-4b1f-992f-23f90a8c129b": CharacteristicDefinition{
+		Name: "motion", ValueType: "uint16_t", ID: 4,
+	},
+}
+
 type CharacteristicDefinition struct {
 	Name           string
 	ValueType      string
+	ID             int
 	characteristic *profile.GattCharacteristic1
 }
 
@@ -26,28 +48,6 @@ type SensorData struct {
 }
 
 func CollectData(address string) (err error) {
-	// Define characteristics
-	var characteristics = map[string]CharacteristicDefinition{
-		"00002a6e-0000-1000-8000-00805f9b34fb": CharacteristicDefinition{
-			Name: "temperature", ValueType: "uint16_t",
-		},
-		"00002a6f-0000-1000-8000-00805f9b34fb": CharacteristicDefinition{
-			Name: "humidity", ValueType: "uint8_t",
-		},
-		"c24229aa-d7e4-4438-a328-c2c548564643": CharacteristicDefinition{
-			Name: "ambient_light", ValueType: "uint32_t",
-		},
-		// "61bf1164-529c-4140-9c61-3f5e4fb4c0c1": CharacteristicDefinition{
-		// 	Name: "uv_light", ValueType: "uint32_t",
-		// },
-		"2f256c42-cdef-4378-8e78-694ea0f53ea8": CharacteristicDefinition{
-			Name: "pressure", ValueType: "uint16_t",
-		},
-		"15e438b8-558e-4b1f-992f-23f90a8c129b": CharacteristicDefinition{
-			Name: "motion", ValueType: "uint16_t",
-		},
-	}
-
 	dev, err := api.GetDeviceByAddress(address)
 	if err != nil {
 		err = errors.Wrap(err, "get device by address")
@@ -58,21 +58,27 @@ func CollectData(address string) (err error) {
 		return
 	}
 
-	for uuid := range characteristics {
+	characteristics := make(map[string]CharacteristicDefinition)
+	for uuid := range characteristicDefinitions {
 		c, err2 := dev.GetCharByUUID(uuid)
 		if err2 != nil {
 			err = err2
 			return
 		}
 		characteristics[uuid] = CharacteristicDefinition{
-			Name:           characteristics[uuid].Name,
-			ValueType:      characteristics[uuid].ValueType,
+			Name:           characteristicDefinitions[uuid].Name,
+			ValueType:      characteristicDefinitions[uuid].ValueType,
+			ID:             characteristicDefinitions[uuid].ID,
 			characteristic: c,
 		}
 	}
 
 	// read the values forever
 	options := make(map[string]dbus.Variant)
+	db, err := Open("sensors.db")
+	if err != nil {
+		return
+	}
 	for {
 		for uuid := range characteristics {
 			b, err2 := characteristics[uuid].characteristic.ReadValue(options)
@@ -82,6 +88,9 @@ func CollectData(address string) (err error) {
 			}
 			data := 0
 			log.Debugf("%s data: %+v", characteristics[uuid].Name, b)
+			if len(b) == 0 {
+				continue
+			}
 			switch characteristics[uuid].ValueType {
 			case "uint8_t":
 				data = int(b[0])
@@ -98,8 +107,11 @@ func CollectData(address string) (err error) {
 				return errors.Wrap(err2, "could not encode "+characteristics[uuid].Name)
 			}
 			Broadcast(bPayload)
+			err2 = db.AddSensor(characteristics[uuid].ID, data)
+			if err2 != nil {
+				return errors.Wrap(err2, "could not add sensor")
+			}
 		}
-		time.Sleep(10 * time.Millisecond)
 	}
 
 }
