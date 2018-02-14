@@ -62,7 +62,7 @@ func CollectData(address string) (err error) {
 	for uuid := range characteristicDefinitions {
 		c, err2 := dev.GetCharByUUID(uuid)
 		if err2 != nil {
-			err = err2
+			err = errors.Wrap(err2, "uuid: "+uuid)
 			return
 		}
 		characteristics[uuid] = CharacteristicDefinition{

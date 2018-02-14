@@ -26,9 +26,7 @@ echo "connect XX" | bluetoothctl
 `, "XX", address, -1)
 	ioutil.WriteFile("run.sh", []byte(script), 0777)
 	log.Debug(script)
-	stdOut, stdErr := RunCommand(3*time.Second, "sh run.sh")
-	log.Debug("stdOut:%s", stdOut)
-	log.Debug("stdErr:%s", stdErr)
+	RunCommand(3*time.Second, "sh run.sh")
 
 	connectedAddress, err = CurrentConnection()
 	if err != nil {
@@ -64,9 +62,9 @@ echo "disconnect XX" | bluetoothctl
 `, "XX", address, -1)
 	ioutil.WriteFile("run.sh", []byte(script), 0777)
 	log.Debug(script)
-	stdOut, stdErr := RunCommand(3*time.Second, "sh run.sh")
-	log.Debug("stdOut:%s", stdOut)
-	log.Debug("stdErr:%s", stdErr)
+	RunCommand(3*time.Second, "sh run.sh")
+	// log.Debug("stdOut:%s", stdOut)
+	// log.Debug("stdErr:%s", stdErr)
 	log.Infof("disconnected from %s", address)
 	return
 }
