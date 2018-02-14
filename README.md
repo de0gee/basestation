@@ -1,4 +1,79 @@
-# Find device
+# Get started
+
+This is the basic install instructions for Raspberry Pi / Linux. Follow these instructions step-by-step to get the Pi working with reading data directly off BlueSense via Bluetooth and visualizing the results in a web browser and saving the data to a database.
+
+In the near-future, these instructions will be compiled into a single script.
+
+## Update the Raspberry Pi
+
+Run these commands on the Pi (patient, as each takes a few minutes):
+
+```
+# install base libraries
+sudo apt-get update
+sudo apt-get dist-upgrade -y
+sudo apt-get install -y vim zsh htop git g++ sqlite3
+sudo apt-get install -y pi-bluetooth # pi only
+sudo apt-get install -y --no-install-recommends bluetooth
+```
+
+## Install node 
+
+```
+# install node
+curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+sudo apt-get install -y nodejs
+```
+
+## Install Go
+
+```
+# install Go
+wget https://dl.google.com/go/go1.9.4.linux-armv6l.tar.gz
+sudo tar -C /usr/local -xzf go1.9.4.*
+rm go1.9.*
+echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
+echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.zshrc
+echo 'export GOPATH=$HOME/go' >> ~/.zshrc
+echo 'export GOPATH=$HOME/go' >> ~/.bashrc
+source ~/.bashrc
+```
+
+## Download the source code for the base station
+
+```
+go get -u -v github.com/de0gee/basestation/...
+```
+
+## Open up two terminals that are SSHed into the Pi
+
+In the first terminal, do
+
+```
+cd /home/pi/go/src/github.com/de0gee/basestation/realtime-client
+npm install
+npm run start
+```
+
+this will compile the client server for viewing the web data.
+
+In the second terminal, do
+
+```
+cd /home/pi/go/src/github.com/de0gee/basestation/realtime-server
+go build
+sudo ./realtime-server
+```
+
+The server will automatically scan for Bluesense and pair with it and start pulling data.
+
+## Open up a web browser
+
+Goto your Pi's address `X.X.X.X:3000` to see the data in realtime! All the data is simultaneously being saved to a database.
+
+# Command-line Bluetooth manipulation
+
+## Find device
 
 ```
 $ sudo btmgmt find
@@ -10,7 +85,7 @@ name BlueSense
 hci0 type 7 discovering off
 ```
 
-# Connect to device
+## Connect to device
 
 ```
 sudo service bluetooth start
@@ -20,10 +95,12 @@ echo "trust 00:0B:57:1B:8C:77" | sudo bluetoothctl
 echo "connect 00:0B:57:1B:8C:77" | sudo bluetoothctl
 ```
 
-# Discover services 
+## Discover services 
 
 ```
-$ gattctl --connect 00:0B:57:1B:8C:77
+sudo apt-get install python3-dbus python3-pip
+sudo python3 -m pip install gatt
+gattctl --connect 00:0B:57:1B:8C:77
 ```
 
 # Disconnect
@@ -32,32 +109,6 @@ $ gattctl --connect 00:0B:57:1B:8C:77
 echo "disconnect 00:0B:57:1B:8C:77" | sudo bluetoothctl
 ```
 
-# Pre-requisities
-
-This is the basic install script for Raspberry Pi / Linux
-```
-sudo apt-get update
-sudo apt-get dist-upgrade -y
-sudo apt-get install -y vim zsh htop git g++ sqlite3
-sudo apt-get install -y pi-bluetooth # pi only
-sudo apt-get install -y --no-install-recommends bluetooth
-
-# install node
-curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-sudo apt-get install -y nodejs
-
-# install Go
-wget https://dl.google.com/go/go1.9.4.linux-armv6l.tar.gz
-sudo tar -C /usr/local -xzf go1.9.4.*
-rm go1.9.*
-echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
-echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.zshrc
-echo 'export GOPATH=$HOME/go' >> ~/.zshrc
-echo 'export GOPATH=$HOME/go' >> ~/.bashrc
-
-go get -u -v github.com/de0gee/basestation/...
-cd /home/pi/go/src/github.com/de0gee/basestation/realtime-client &&  npm install
-```
 
 # BlueSense GATT Profile
 
