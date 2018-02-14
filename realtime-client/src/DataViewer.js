@@ -15,6 +15,8 @@ class DataViewer extends React.Component {
       motion: [[{x:0,y:0}]],
       temperature: [[{x:0,y:0}]],
       ambient_light: [[{x:0,y:0}]],
+      pressure: [[{x:0,y:0}]],
+      humidity: [[{x:0,y:0}]],
     };
   }
 
@@ -37,7 +39,7 @@ class DataViewer extends React.Component {
   render() {
     return ( 
     <div>
-      <p> Motion sensor </p> 
+      <p> Motion </p> 
       <LineChart data = {this.state.motion}
       width = {this.state.componentWidth}
       height = {this.state.componentWidth / 2}
@@ -54,8 +56,27 @@ class DataViewer extends React.Component {
       interpolate = {'cardinal'}
       // yDomainRange={[0, 100]}
       axes grid style = {{'.line0': {stroke: 'green'}}} /> 
-      <p> Temperature sensor </p> 
+      <p> Temperature </p> 
       <LineChart data = {this.state.temperature}
+      width = {this.state.componentWidth}
+      height = {this.state.componentWidth / 2}
+      axisLabels = {{x: 'Hour',y: 'Percentage'}}
+      interpolate = {'cardinal'}
+      // yDomainRange={[0, 100]}
+      axes grid style = {{'.line0': {stroke: 'green'}}}
+      /> 
+      <p> Pressure </p> 
+      <LineChart data = {this.state.pressure}
+      width = {this.state.componentWidth}
+      height = {this.state.componentWidth / 2}
+      axisLabels = {{x: 'Hour',y: 'Percentage'}}
+      interpolate = {'cardinal'}
+      // yDomainRange={[0, 100]}
+      axes grid style = {{'.line0': {stroke: 'green'}}}
+      /> 
+ 
+      <p> Humidity </p> 
+      <LineChart data = {this.state.humidity}
       width = {this.state.componentWidth}
       height = {this.state.componentWidth / 2}
       axisLabels = {{x: 'Hour',y: 'Percentage'}}

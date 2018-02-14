@@ -6,19 +6,18 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/muka/go-bluetooth/bluez/profile"
+
+	"github.com/pkg/errors"
+
 	"github.com/godbus/dbus"
 	"github.com/muka/go-bluetooth/api"
 )
 
 type CharacteristicDefinition struct {
-	Name      string
-	ValueType string
-}
-
-var CharactersticDefinitions = map[string]CharacteristicDefinition{
-	"15e438b8-558e-4b1f-992f-23f90a8c129b": CharacteristicDefinition{
-		Name: "motion", ValueType: "uint16_t",
-	},
+	Name           string
+	ValueType      string
+	characteristic *profile.GattCharacteristic1
 }
 
 type SensorData struct {
@@ -26,53 +25,80 @@ type SensorData struct {
 	Data int    `json:"data"`
 }
 
-func CollectData(address string) {
+func CollectData(address string) (err error) {
+	// Define characteristics
+	var characteristics = map[string]CharacteristicDefinition{
+		"00002a6e-0000-1000-8000-00805f9b34fb": CharacteristicDefinition{
+			Name: "temperature", ValueType: "uint16_t",
+		},
+		"00002a6f-0000-1000-8000-00805f9b34fb": CharacteristicDefinition{
+			Name: "humidity", ValueType: "uint8_t",
+		},
+		"c24229aa-d7e4-4438-a328-c2c548564643": CharacteristicDefinition{
+			Name: "ambient_light", ValueType: "uint32_t",
+		},
+		// "61bf1164-529c-4140-9c61-3f5e4fb4c0c1": CharacteristicDefinition{
+		// 	Name: "uv_light", ValueType: "uint32_t",
+		// },
+		"2f256c42-cdef-4378-8e78-694ea0f53ea8": CharacteristicDefinition{
+			Name: "pressure", ValueType: "uint16_t",
+		},
+		"15e438b8-558e-4b1f-992f-23f90a8c129b": CharacteristicDefinition{
+			Name: "motion", ValueType: "uint16_t",
+		},
+	}
+
 	dev, err := api.GetDeviceByAddress(address)
 	if err != nil {
-		panic(err)
+		err = errors.Wrap(err, "get device by address")
+		return
 	}
 	if dev == nil {
-		panic("Device not found")
+		err = errors.New("device not found")
+		return
 	}
 
-	characteristic, err := dev.GetCharByUUID("15e438b8-558e-4b1f-992f-23f90a8c129b")
-	if err != nil {
-		panic(err)
+	for uuid := range characteristics {
+		c, err2 := dev.GetCharByUUID(uuid)
+		if err2 != nil {
+			err = err2
+			return
+		}
+		characteristics[uuid] = CharacteristicDefinition{
+			Name:           characteristics[uuid].Name,
+			ValueType:      characteristics[uuid].ValueType,
+			characteristic: c,
+		}
 	}
-	light, err := dev.GetCharByUUID("c24229aa-d7e4-4438-a328-c2c548564643")
+
+	// read the values forever
 	options := make(map[string]dbus.Variant)
 	for {
-		b, err := (characteristic.ReadValue(options))
-		if err != nil {
-			log.Warn(err)
-			continue
+		for uuid := range characteristics {
+			b, err2 := characteristics[uuid].characteristic.ReadValue(options)
+			if err2 != nil {
+				err = errors.Wrap(err2, "problem reading value for "+characteristics[uuid].Name)
+				return
+			}
+			data := 0
+			log.Debugf("%s data: %+v", characteristics[uuid].Name, b)
+			switch characteristics[uuid].ValueType {
+			case "uint8_t":
+				data = int(b[0])
+			case "uint16_t":
+				data = int(binary.LittleEndian.Uint16(b))
+			case "uint32_t":
+				data = int(binary.LittleEndian.Uint32(b))
+			}
+			bPayload, err2 := json.Marshal(SensorData{
+				Name: characteristics[uuid].Name,
+				Data: data,
+			})
+			if err2 != nil {
+				return errors.Wrap(err2, "could not encode "+characteristics[uuid].Name)
+			}
+			Broadcast(bPayload)
 		}
-		u16 := binary.LittleEndian.Uint16(b)
-		bPayload, err := json.Marshal(SensorData{
-			Name: "motion",
-			Data: int(u16),
-		})
-		if err != nil {
-			log.Warn(err)
-			continue
-		}
-		Broadcast(bPayload)
-
-		b, err = (light.ReadValue(options))
-		if err != nil {
-			log.Warn(err)
-			continue
-		}
-		u32 := binary.LittleEndian.Uint32(b)
-		bPayload, err = json.Marshal(SensorData{
-			Name: "ambient_light",
-			Data: int(u32),
-		})
-		if err != nil {
-			log.Warn(err)
-			continue
-		}
-		Broadcast(bPayload)
 		time.Sleep(10 * time.Millisecond)
 	}
 

@@ -14,7 +14,8 @@ func main() {
 			panic(err)
 		}
 	}()
-	log.SetLevel(log.InfoLevel)
+
+	log.SetLevel(log.DebugLevel)
 	// address, err := DiscoverDevice("BlueSense")
 	// if err != nil {
 	// 	log.Error(err)
@@ -25,7 +26,14 @@ func main() {
 	err := ConnectToBluetooth(address)
 	if err != nil {
 		log.Error(err)
+		return
 	}
-	CollectData(address)
+	log.Infof("connected to %s", address)
+	log.Infof("collecting data")
+	err = CollectData(address)
+	if err != nil {
+		log.Error(err)
+		return
+	}
 	defer DisconnectToBluetooth(address)
 }
