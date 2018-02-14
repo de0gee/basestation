@@ -48,6 +48,8 @@ func main() {
 
 func connectAndRetrieveData() (err error) {
 	defer DisconnectToBluetooth(addressOfDevice)
+	ConnectToBluetooth(addressOfDevice)
+	time.Sleep(3 * time.Second)
 	err = ConnectToBluetooth(addressOfDevice)
 	if err != nil {
 		return
