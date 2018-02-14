@@ -10,7 +10,7 @@ class DataViewer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      websocket_url: 'ws://localhost:8002/ws',
+      websocket_url: window.location.href.replace("http","ws").replace(":3000",":8002")+"ws",
       componentWidth: 600,
       motion: [[{x:0,y:0}]],
       temperature: [[{x:0,y:0}]],

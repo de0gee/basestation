@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	log "github.com/Sirupsen/logrus"
 )
 
@@ -30,11 +32,16 @@ func main() {
 		return
 	}
 	log.Infof("connected to %s", address)
+	time.Sleep(3 * time.Second)
 	log.Infof("collecting data")
-	err = CollectData(address)
-	if err != nil {
-		log.Error(err)
-		return
+	for {
+		err = CollectData(address)
+		if err != nil {
+			log.Error(err)
+		}
+		err = DisconnectToBluetooth(address)
+		if err != nil {
+			log.Warn(err)
+		}
 	}
-	defer DisconnectToBluetooth(address)
 }
