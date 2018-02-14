@@ -26,7 +26,7 @@ echo "connect XX" | bluetoothctl
 `, "XX", address, -1)
 	ioutil.WriteFile("run.sh", []byte(script), 0777)
 	log.Debug(script)
-	RunCommand(3*time.Second, "sh run.sh")
+	RunCommand(10*time.Second, "sh run.sh")
 
 	connectedAddress, err = CurrentConnection()
 	if err != nil {
