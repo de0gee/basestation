@@ -12,7 +12,7 @@ Run these commands on the Pi (patient, as each takes a few minutes):
 # install base libraries
 sudo apt-get update
 sudo apt-get dist-upgrade -y
-sudo apt-get install -y vim zsh htop git g++ sqlite3
+sudo apt-get install -y vim htop git g++ sqlite3
 sudo apt-get install -y pi-bluetooth # pi only
 sudo apt-get install -y --no-install-recommends bluetooth
 ```
@@ -45,11 +45,9 @@ sudo apt-get install -y nodejs
 wget https://dl.google.com/go/go1.9.4.linux-armv6l.tar.gz
 sudo tar -C /usr/local -xzf go1.9.4.*
 rm go1.9.*
-echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
-echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.zshrc
-echo 'export GOPATH=$HOME/go' >> ~/.zshrc
-echo 'export GOPATH=$HOME/go' >> ~/.bashrc
-source ~/.bashrc
+echo 'export PATH=$PATH:/usr/local/go/bin' >>  ~/.profile
+echo 'export GOPATH=$HOME/go' >>  ~/.profile
+source ~/.profile
 ```
 
 ## Download the source code for the base station
