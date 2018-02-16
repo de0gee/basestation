@@ -19,6 +19,19 @@ sudo apt-get install -y --no-install-recommends bluetooth
 
 ## Install node 
 
+Raspberry Pi:
+
+```
+wget https://nodejs.org/dist/v8.9.4/node-v8.9.4-linux-armv6l.tar.xz
+sudo mkdir /usr/lib/nodejs
+sudo tar -xJvf node-v8.9.4-linux-armv6l.tar.xz -C /usr/lib/nodejs 
+sudo mv /usr/lib/nodejs/node-v8.9.4-linux-armv6l /usr/lib/nodejs/node-v8.9.4
+echo 'export NODEJS_HOME=/usr/lib/nodejs/node-v8.9.4' >> ~/.profile
+echo 'export PATH=$NODEJS_HOME/bin:$PATH' >> ~/.profile
+source ~/.profile
+```
+
+Linux regular:
 ```
 # install node
 curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
