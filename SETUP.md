@@ -31,13 +31,16 @@ echo 'export GOPATH=$HOME/go' >>  ~/.profile
 source ~/.profile
 ```
 
+# Install Hostapd
 
+```
 sudo systemctl stop dnsmasq && sudo systemctl stop hostapd
 
 echo 'interface wlan0
 static ip_address=192.168.4.1/24' | sudo tee --append /etc/dhcpcd.conf
 sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig  
 
+sudo systemctl daemon-reload
 sudo systemctl restart dhcpcd
 
 echo 'interface=wlan0
@@ -58,7 +61,7 @@ wpa_key_mgmt=WPA-PSK
 wpa_pairwise=TKIP
 rsn_pairwise=CCMP' | sudo tee --append /etc/hostapd/hostapd.conf
 
-echo 'DAEMON_CONF="/etc/hostapd/hostapd.conf"' | sudo tee --append/etc/default/hostapd
+echo 'DAEMON_CONF="/etc/hostapd/hostapd.conf"' | sudo tee --append /etc/default/hostapd
 
 sudo systemctl start hostapd && sudo systemctl start dnsmasq
 ```
