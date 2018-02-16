@@ -30,8 +30,8 @@ var characteristicDefinitions = map[string]CharacteristicDefinition{
 	"2f256c42-cdef-4378-8e78-694ea0f53ea8": CharacteristicDefinition{
 		Name: "pressure", ValueType: "uint16_t", ID: 3,
 	},
-	"15e438b8-558e-4b1f-992f-23f90a8c129b": CharacteristicDefinition{
-		Name: "motion", ValueType: "uint16_t", ID: 4,
+	"00002a19-0000-1000-8000-00805f9b34fb": CharacteristicDefinition{
+		Name: "battery", ValueType: "uint8_t", ID: 5,
 	},
 }
 

@@ -17,6 +17,7 @@ class DataViewer extends React.Component {
       ambient_light: [[{x:0,y:0}]],
       pressure: [[{x:0,y:0}]],
       humidity: [[{x:0,y:0}]],
+      battery: [[{x:0,y:0}]],
     };
   }
 
@@ -75,8 +76,18 @@ class DataViewer extends React.Component {
       axes grid style = {{'.line0': {stroke: 'green'}}}
       /> 
  
-      <p> Humidity </p> 
+ <p> Humidity </p> 
       <LineChart data = {this.state.humidity}
+      width = {this.state.componentWidth}
+      height = {this.state.componentWidth / 2}
+      axisLabels = {{x: 'Hour',y: 'Percentage'}}
+      interpolate = {'cardinal'}
+      // yDomainRange={[0, 100]}
+      axes grid style = {{'.line0': {stroke: 'green'}}}
+      />  
+
+      <p> Battery </p> 
+      <LineChart data = {this.state.battery}
       width = {this.state.componentWidth}
       height = {this.state.componentWidth / 2}
       axisLabels = {{x: 'Hour',y: 'Percentage'}}
@@ -86,7 +97,7 @@ class DataViewer extends React.Component {
       /> 
 
 
-      <Websocket url = {this.state.websocket_url}      onMessage = {this.handleData.bind(this)}
+      <Websocket url = {this.state.websocket_url} onMessage = {this.handleData.bind(this)}
       /> 
     </div>
     );

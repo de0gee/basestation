@@ -1,7 +1,37 @@
 # Instructions for making a turn-key image
 
 ```
-sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get install -y dnsmasq hostapd vim 
+sudo apt-get update
+sudo apt-get dist-upgrade -y
+sudo apt-get install -y dnsmasq hostapd vim g++ sqlite3
+```
+
+## Install node 
+
+```
+wget https://nodejs.org/dist/v8.9.4/node-v8.9.4-linux-armv6l.tar.xz
+sudo mkdir /usr/lib/nodejs
+sudo tar -xJvf node-v8.9.4-linux-armv6l.tar.xz -C /usr/lib/nodejs 
+rm -rf node-v8.9.4-linux-armv6l.tar.xz
+sudo mv /usr/lib/nodejs/node-v8.9.4-linux-armv6l /usr/lib/nodejs/node-v8.9.4
+echo 'export NODEJS_HOME=/usr/lib/nodejs/node-v8.9.4' >> ~/.profile
+echo 'export PATH=$NODEJS_HOME/bin:$PATH' >> ~/.profile
+source ~/.profile
+```
+
+## Install Go
+
+```
+# install Go
+wget https://dl.google.com/go/go1.9.4.linux-armv6l.tar.gz
+sudo tar -C /usr/local -xzf go1.9.4.*
+rm go1.9.*
+echo 'export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin' >>  ~/.profile
+echo 'export GOPATH=$HOME/go' >>  ~/.profile
+source ~/.profile
+```
+
+
 sudo systemctl stop dnsmasq && sudo systemctl stop hostapd
 
 echo 'interface wlan0
