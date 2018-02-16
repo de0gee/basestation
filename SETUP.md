@@ -65,3 +65,38 @@ echo 'DAEMON_CONF="/etc/hostapd/hostapd.conf"' | sudo tee --append /etc/default/
 
 sudo systemctl start hostapd && sudo systemctl start dnsmasq
 ```
+
+# Setup server
+
+```
+go get github.com/mholt/caddy/caddy
+
+# Disable:
+
+sudo sed -i '/DAEMON_CONF="\/etc/s/^/#/g' /etc/default/hostapd
+sudo sed -i '/interface wlan0/s/^/#/g' /etc/dhcpcd.conf
+sudo sed -i '/static ip_address=192.168.4.1\/24/s/^/#/g' /etc/dhcpcd.conf
+
+# Enable:
+
+sudo sed -i '/DAEMON_CONF="\/etc/s/^#//g' /etc/default/hostapd
+sudo sed -i '/interface wlan0/s/^#//g' /etc/dhcpcd.conf
+sudo sed -i '/static ip_address=192.168.4.1\/24/s/^#//g' /etc/dhcpcd.conf
+```
+
+
+Testing WiFi: https://raspberrypi.stackexchange.com/questions/61131/is-there-a-way-to-test-a-wifi-password-from-the-command-line-before-connecting-t
+
+
+
+
+
+
+
+
+
+
+
+
+
+
