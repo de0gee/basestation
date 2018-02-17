@@ -3,7 +3,7 @@
 ```
 sudo apt-get update
 sudo apt-get dist-upgrade -y
-sudo apt-get install -y dnsmasq hostapd vim g++ sqlite3
+sudo apt-get install -y dnsmasq hostapd vim g++ sqlite3 python3-flask
 ```
 
 ## Install node 
@@ -65,108 +65,11 @@ echo 'DAEMON_CONF="/etc/hostapd/hostapd.conf"' | sudo tee --append /etc/default/
 
 sudo systemctl start hostapd && sudo systemctl start dnsmasq
 git clone https://github.com/de0gee/basestation.git
-
-sudo apt-get install -y python3-flask
 ```
 
 Add to cron
 
 ```
-cd /home/pi/basestation/turnkey && /usr/bin/python3 server.py
+cd /home/pi/basestation/turnkey && /usr/bin/sudo /usr/bin/python3 server.py
 ```
-
-
-# Setup server (this should be scripted)
-
-```
-go get github.com/mholt/caddy/caddy
-
-# Disable:
-
-sudo sed -i '/DAEMON_CONF="\/etc/s/^/#/g' /etc/default/hostapd
-sudo sed -i '/interface wlan0/s/^/#/g' /etc/dhcpcd.conf
-sudo sed -i '/static ip_address=192.168.4.1\/24/s/^/#/g' /etc/dhcpcd.conf
-sudo sed -i '/interface=wlan0/s/^/#/g' /etc/dnsmasq.conf
-sudo sed -i '/dhcp-range=/s/^/#/g' /etc/dnsmasq.conf
-
-# Enable:
-sudo sed -i '/DAEMON_CONF="\/etc/s/^#//g' /etc/default/hostapd
-sudo sed -i '/interface wlan0/s/^#//g' /etc/dhcpcd.conf
-sudo sed -i '/static ip_address=192.168.4.1\/24/s/^#//g' /etc/dhcpcd.conf
-sudo sed -i '/interface=wlan0/s/^#//g' /etc/dnsmasq.conf
-sudo sed -i '/dhcp-range=/s/^#//g' /etc/dnsmasq.conf
-
-```
-
-with password, run:
-
-```
-country=GB
-ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
-update_config=1
-network={
-    ssid="SSID"
-    psk="PSK"
-}
-```
-
-Then reload with:
-
-```
-sudo reboot now
-```
-
-Testing WiFi: https://raspberrypi.stackexchange.com/questions/61131/is-there-a-way-to-test-a-wifi-password-from-the-command-line-before-connecting-t
-
-```
-sudo ifconfig wlan0 down
-sudo ifconfig wlan0 up
-```
-
-```
-wpa_passphrase "ssid" "password" > out
-sudo wpa_supplicant -Dwext -cout -iwlan0
-```
-
-WITHOUT being connected:
-
-eth0      no wireless extensions.
-
-wlan0     IEEE 802.11  ESSID:off/any  
-          Mode:Managed  Access Point: Not-Associated   Tx-Power=31 dBm   
-          Retry short limit:7   RTS thr:off   Fragment thr:off
-          Power Management:on
-          
-lo        no wireless extensions.
-
-WITH BEING CONNECTED:
-
-eth0      no wireless extensions.
-
-wlan0     IEEE 802.11  ESSID:"R"  
-          Mode:Managed  Frequency:2.437 GHz  Access Point: 88:D7:F6:A7:2A:48   
-          Bit Rate=65 Mb/s   Tx-Power=31 dBm   
-          Retry short limit:7   RTS thr:off   Fragment thr:off
-          Power Management:on
-          Link Quality=70/70  Signal level=-35 dBm  
-          Rx invalid nwid:0  Rx invalid crypt:0  Rx invalid frag:0
-          Tx excessive retries:0  Invalid misc:0   Missed beacon:0
-
-lo        no wireless extensions.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
