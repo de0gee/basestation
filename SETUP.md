@@ -64,7 +64,17 @@ rsn_pairwise=CCMP' | sudo tee --append /etc/hostapd/hostapd.conf
 echo 'DAEMON_CONF="/etc/hostapd/hostapd.conf"' | sudo tee --append /etc/default/hostapd
 
 sudo systemctl start hostapd && sudo systemctl start dnsmasq
+git clone https://github.com/de0gee/basestation.git
+
+sudo apt-get install -y python3-flask
 ```
+
+Add to cron
+
+```
+cd /home/pi/basestation/turnkey && /usr/bin/python3 server.py
+```
+
 
 # Setup server (this should be scripted)
 

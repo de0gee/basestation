@@ -32,7 +32,7 @@ def signin():
         f.write(wpa_conf.replace('_ssid_',ssid).replace('_password_',password))
     with open('status.json','w') as f:
         f.write(json.dumps({'status':'disconnected'}))
-    subprocess.call("./disable_ap.sh", shell=True)
+    subprocess.Popen(["./disable_ap.sh"])
     return render_template('index.html', message="You are signed in. Please wait 2 minutes and then check your email for the link.")
 
 if __name__ == "__main__":
@@ -56,5 +56,7 @@ if __name__ == "__main__":
         with open('status.json','w') as f:
             f.write(json.dumps(s))    
         subprocess.call("./enable_ap.sh", shell=True)
-    elif s['status'] == 'hostapd':
+    elif s['status'] == 'connected':
+        pass
+    else:
         app.run(host="0.0.0.0",port=80)

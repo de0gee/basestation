@@ -1,5 +1,7 @@
 #!/bin/bash
 
+sleep 3
+
 # disable the AP
 sudo sed -i '/DAEMON_CONF="\/etc/s/^/#/g' /etc/default/hostapd
 sudo sed -i '/interface wlan0/s/^/#/g' /etc/dhcpcd.conf
