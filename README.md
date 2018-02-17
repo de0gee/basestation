@@ -9,7 +9,13 @@ In the near-future, these instructions will be compiled into a single script.
 Start from https://github.com/schollz/raspberry-pi-turnkey
 
 ```
-go get -u -v github.com/de0gee/basestation/...
+$ go get -u -v github.com/de0gee/basestation/...
+```
+
+(intermediate2.img)
+
+```
+$ sudo apt-get install expect
 ```
 
 Add `$GOPATH/src/github.com/de0gee/basestation/startup.sh` to `raspberry-pi-turnkey/startup.py`.
