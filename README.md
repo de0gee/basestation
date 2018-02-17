@@ -12,10 +12,9 @@ Start from https://github.com/schollz/raspberry-pi-turnkey
 $ go get -u -v github.com/de0gee/basestation/...
 ```
 
-(intermediate2.img)
-
 ```
-$ sudo apt-get install expect
+$ sudo apt-get install -y expect
+$ sudo npm install -g yarn
 ```
 
 Add pi to sudoers
@@ -27,11 +26,59 @@ $ sudo visudo
 Pull latest 
 
 ```
+$ cd /home/pi/raspberry-pi-turnkey && git pull
 $ cd $GOPATH/src/github.com/de0gee/basestation && git pull
+$ cd $GOPATH/src/github.com/de0gee/basestation/realtime-client && yarn install
 ```
 
-Add `$GOPATH/src/github.com/de0gee/basestation/startup.sh` to `raspberry-pi-turnkey/startup.py`.
 
+Make start_de0gee.sh:
+
+```
+$ vim ~/raspberry-pi-turnkey/start_de0gee.sh
+#!/bin/bash
+
+export HOME=/home/pi
+source /home/pi/.profile
+
+cd $GOPATH/src/github.com/de0gee/basestation
+git pull
+
+sudo service bluetooth restart
+
+cd $GOPATH/src/github.com/de0gee/basestation/realtime-client 
+yarn install
+nohup npm run start >/tmp/client.log 2>&1 &
+
+cd $GOPATH/src/github.com/de0gee/basestation/realtime-server
+go build -v
+nohup sudo ./realtime-server >/tmp/server.log 2>&1 &
+```
+
+Make executable
+
+```
+$ chmod +x ~/raspberry-pi-turnkey/start_de0gee.sh
+```
+
+Add to startup.py
+
+```python
+subprocess.Popen(["./start_de0gee.sh"])
+time.sleep(60000)
+```
+
+Change `crontab` so that this is in the user crontab and not the super user crontab:
+
+```
+@reboot cd /home/pi/raspberry-pi-turnkey && /usr/bin/sudo /usr/bin/python3 startup.py
+```
+
+```
+rm /home/pi/raspberry-pi-turnkey/status.json
+```
+
+Saved as `de0gee-2018-02-17.img`
 
 ## Update the Raspberry Pi
 
