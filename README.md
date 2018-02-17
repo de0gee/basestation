@@ -18,6 +18,18 @@ $ go get -u -v github.com/de0gee/basestation/...
 $ sudo apt-get install expect
 ```
 
+Add pi to sudoers
+
+```
+$ sudo visudo
+```
+
+Pull latest 
+
+```
+$ cd $GOPATH/src/github.com/de0gee/basestation && git pull
+```
+
 Add `$GOPATH/src/github.com/de0gee/basestation/startup.sh` to `raspberry-pi-turnkey/startup.py`.
 
 

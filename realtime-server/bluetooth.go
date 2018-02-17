@@ -48,7 +48,7 @@ expect eof
 `
 	ioutil.WriteFile("run.sh", []byte(script), 0777)
 	log.Debug(script)
-	RunCommand(10*time.Second, "expect run.sh "+address)
+	RunCommand(30*time.Second, "expect run.sh "+address)
 
 	connectedAddress, err = CurrentConnection()
 	if err != nil {
