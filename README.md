@@ -19,7 +19,7 @@ sudo apt-get install -y --no-install-recommends bluetooth
 
 ## Install node 
 
-Raspberry Pi:
+Raspberry Pi only:
 
 ```
 wget https://nodejs.org/dist/v8.9.4/node-v8.9.4-linux-armv6l.tar.xz
@@ -32,7 +32,7 @@ echo 'export PATH=$NODEJS_HOME/bin:$PATH' >> ~/.profile
 source ~/.profile
 ```
 
-Linux regular:
+Linux only:
 
 ```
 # install node
@@ -42,11 +42,24 @@ sudo apt-get install -y nodejs
 
 ## Install Go
 
+Raspberry Pi only:
+
 ```
-# install Go
-wget https://dl.google.com/go/go1.9.4.linux-armv6l.tar.gz
-sudo tar -C /usr/local -xzf go1.9.4.*
-rm go1.9.*
+wget https://dl.google.com/go/go1.10.linux-armv6l.tar.gz
+
+```
+
+Linux only:
+
+```
+wget https://dl.google.com/go/go1.10.linux-amd64.tar.gz
+```
+
+Then, for both Raspberry Pi or Linux:
+
+```
+sudo tar -C /usr/local -xzf go*gz
+rm go*gz
 echo 'export PATH=$PATH:/usr/local/go/bin' >>  ~/.profile
 echo 'export GOPATH=$HOME/go' >>  ~/.profile
 source ~/.profile
