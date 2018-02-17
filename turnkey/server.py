@@ -35,7 +35,7 @@ def signin():
         f.write(wpa_conf.replace('_ssid_',ssid).replace('_password_',password))
     with open('status.json','w') as f:
         f.write(json.dumps({'status':'disconnected'}))
-    subprocess.call("./disable_ap.sh", shell=True)
+    # subprocess.call("./disable_ap.sh", shell=True)
     return jsonify({'success':True})
 
 if __name__ == "__main__":
