@@ -4,6 +4,17 @@ This is the basic install instructions for Raspberry Pi / Linux. Follow these in
 
 In the near-future, these instructions will be compiled into a single script.
 
+## Image
+
+Start from https://github.com/schollz/raspberry-pi-turnkey
+
+```
+go get -u -v github.com/de0gee/basestation/...
+```
+
+Add `$GOPATH/src/github.com/de0gee/basestation/startup.sh` to `raspberry-pi-turnkey/startup.py`.
+
+
 ## Update the Raspberry Pi
 
 Run these commands on the Pi (patient, as each takes a few minutes):
@@ -66,6 +77,7 @@ source ~/.profile
 ```
 
 ## Download the source code for the base station
+
 
 ```
 go get -u -v github.com/de0gee/basestation/...
