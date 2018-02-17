@@ -1,9 +1,11 @@
 # Instructions for making a turn-key image
 
+Starting from version Raspbian Stretch Lite version 2017-11-29.
+
 ```
 sudo apt-get update
 sudo apt-get dist-upgrade -y
-sudo apt-get install -y dnsmasq hostapd vim g++ sqlite3 python3-flask
+sudo apt-get install -y dnsmasq hostapd vim g++ sqlite3 python3-flask git
 ```
 
 ## Install node 
@@ -31,6 +33,11 @@ echo 'export GOPATH=$HOME/go' >>  ~/.profile
 source ~/.profile
 ```
 
+# Install base station
+
+```
+go get -v github.com/de0gee/basestation/...
+```
 # Install Hostapd
 
 ```
@@ -48,7 +55,7 @@ dhcp-range=192.168.4.2,192.168.4.20,255.255.255.0,24h' | sudo tee --append /etc/
 
 echo 'interface=wlan0
 driver=nl80211
-ssid=NameOfNetwork
+ssid=de0geeBluesense
 hw_mode=g
 channel=7
 wmm_enabled=0
@@ -56,7 +63,7 @@ macaddr_acl=0
 auth_algs=1
 ignore_broadcast_ssid=0
 wpa=2
-wpa_passphrase=AardvarkBadgerHedgehog
+wpa_passphrase=de0geeBluesense
 wpa_key_mgmt=WPA-PSK
 wpa_pairwise=TKIP
 rsn_pairwise=CCMP' | sudo tee --append /etc/hostapd/hostapd.conf
@@ -64,12 +71,12 @@ rsn_pairwise=CCMP' | sudo tee --append /etc/hostapd/hostapd.conf
 echo 'DAEMON_CONF="/etc/hostapd/hostapd.conf"' | sudo tee --append /etc/default/hostapd
 
 sudo systemctl start hostapd && sudo systemctl start dnsmasq
-git clone https://github.com/de0gee/basestation.git
 ```
 
 Add to cron
 
 ```
-cd /home/pi/basestation/turnkey && /usr/bin/sudo /usr/bin/python3 server.py
+@reboot cd /home/pi/go/src/github.com/de0gee/basestation/turnkey && /usr/bin/sudo /usr/bin/python3 server.py
 ```
 
+Then saved as de0gee-20180216.img.
