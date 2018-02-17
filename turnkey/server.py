@@ -3,7 +3,7 @@ import re
 import json
 import os.path 
 
-from flask import Flask, request, send_from_directory,jsonify
+from flask import Flask, request, send_from_directory,jsonify, render_template
 app = Flask(__name__, static_url_path='')
 
 wpa_conf = """country=GB
@@ -16,27 +16,24 @@ network={
 
 @app.route('/')
 def main():
-    print("index page")
-    return send_from_directory('build', 'index.html')
+    return render_template('index.html')
 
 @app.route('/static/<path:path>')
 def send_static(path):
-    return send_from_directory('build/static', path)
+    return send_from_directory('static', path)
 
 @app.route('/signin', methods=['POST'])
 def signin():
-    content = request.get_json(silent=True)
-    print(content)
-    email = content['currentState']['email']
-    ssid = content['currentState']['ssid']
-    password = content['currentState']['password']
+    email = request.form['email']
+    ssid = request.form['ssid']
+    password = request.form['password']
     print(email,ssid,password)
     with open('wpa.conf','w') as f:
         f.write(wpa_conf.replace('_ssid_',ssid).replace('_password_',password))
     with open('status.json','w') as f:
         f.write(json.dumps({'status':'disconnected'}))
-    # subprocess.call("./disable_ap.sh", shell=True)
-    return jsonify({'success':True})
+    # # subprocess.call("./disable_ap.sh", shell=True)
+    return render_template('index.html', message="You are signed in. Please wait 2 minutes and then check your email for the link.")
 
 if __name__ == "__main__":
     # get status
