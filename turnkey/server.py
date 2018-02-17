@@ -16,6 +16,7 @@ network={
 
 @app.route('/')
 def main():
+    print("index page")
     return send_from_directory('build', 'index.html')
 
 @app.route('/static/<path:path>')
