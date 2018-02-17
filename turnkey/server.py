@@ -29,6 +29,7 @@ def signin():
     email = content['currentState']['email']
     ssid = content['currentState']['ssid']
     password = content['currentState']['password']
+    print(email,ssid,password)
     with open('wpa.conf','w') as f:
         f.write(wpa_conf.replace('_ssid_',ssid).replace('_password_',password))
     with open('status.json','w') as f:
