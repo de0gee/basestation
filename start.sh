@@ -1,6 +1,7 @@
 #!/bin/bash
 
-go get -u -v github.com/de0gee/basestation/...
+cd $GOPATH/src/github.com/de0gee/basestation
+git pull
 
 sudo service bluetooth restart
 sleep 3
