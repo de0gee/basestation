@@ -53,7 +53,9 @@ expect eof
 	RunCommand(30*time.Second, "expect run.sh "+address)
 
 	connectedAddress, err = CurrentConnection()
+	log.Debugf("current connected: %s", connectedAddress)
 	if err != nil {
+		log.Warn(err)
 		return
 	}
 	if connectedAddress != address {
