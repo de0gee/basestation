@@ -12,7 +12,7 @@ import (
 const logLevel = log.DebugLevel
 const adapterID = "hci0"
 
-var addressOfDevice = "00:0B:57:1B:8C:77"
+var addressOfDevice = ""
 
 func main() {
 	var err error
@@ -24,11 +24,11 @@ func main() {
 	}()
 
 	log.SetLevel(log.DebugLevel)
-	// address, err := DiscoverDevice("BlueSense")
-	// if err != nil {
-	// 	log.Error(err)
-	// }
-	// log.Infof("found BlueSense: %s", address)
+	addressOfDevice, err = DiscoverDevice("BlueSense")
+	if err != nil {
+		log.Error(err)
+	}
+	log.Infof("found BlueSense: %s", addressOfDevice)
 
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
