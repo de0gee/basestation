@@ -6,8 +6,8 @@ git pull
 sudo service bluetooth restart
 
 cd $GOPATH/src/github.com/de0gee/basestation/realtime-client 
-npm install
-nohup npm run start >/tmp/client.log 2>&1 &
+yarn install
+nohup yarn run start >/tmp/client.log 2>&1 &
 
 cd $GOPATH/src/github.com/de0gee/basestation/realtime-server
 go build
