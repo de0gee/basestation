@@ -24,6 +24,7 @@ $ cd /home/pi/raspberry-pi-turnkey && git pull
 $ cd $GOPATH/src/github.com/de0gee/basestation && git pull
 $ cd $GOPATH/src/github.com/de0gee/basestation/realtime-client && yarn install
 ```
+
 ### Add start script
 
 ```
@@ -34,6 +35,12 @@ Make executable
 
 ```
 $ chmod +x ~/raspberry-pi-turnkey/startup.sh
+```
+
+Add to `~/raspberry-pi-turnkey/startup.py`:
+
+```python
+r = requests.post("https://snaptext.live",data=json.dumps({"message":"Goto de0gee at: <a href='http://{}:3000'>{}:3000</a>".format(ipaddress,ipaddress),"to":piid,"from":"Raspberry Pi Turnkey"}))
 ```
 
 *(save as de0gee-intermediate.img)*
