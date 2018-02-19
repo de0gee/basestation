@@ -24,13 +24,10 @@ $ cd /home/pi/raspberry-pi-turnkey && git pull
 $ cd $GOPATH/src/github.com/de0gee/basestation && git pull
 $ cd $GOPATH/src/github.com/de0gee/basestation/realtime-client && yarn install
 ```
-
-(save as de0gee-intermediate.img)
-
 ### Add start script
 
 ```
-$ cp $GOPATH/src/github.com/de0gee/basestation/startup.sh ~/raspberry-pi-turnkey/start.sh
+$ cp $GOPATH/src/github.com/de0gee/basestation/start.sh ~/raspberry-pi-turnkey/startup.sh
 ```
 
 Make executable
@@ -38,6 +35,8 @@ Make executable
 ```
 $ chmod +x ~/raspberry-pi-turnkey/startup.sh
 ```
+
+*(save as de0gee-intermediate.img)*
 
 ### Startup server on boot
 
@@ -54,7 +53,7 @@ su pi -c '/usr/bin/sudo /usr/bin/python3 /home/pi/raspberry-pi-turnkey/startup.p
 ```
 
 
-## Update the Raspberry Pi
+## Update the Raspberry Pi, from scratch
 
 Run these commands on the Pi (patient, as each takes a few minutes):
 
