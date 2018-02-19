@@ -12,8 +12,10 @@ import (
 
 // ConnectToBluetooth will connect to the corresponding address
 func ConnectToBluetooth(address string) (err error) {
+	log.Infof("connecting to %s", address)
 	connectedAddress, _ := CurrentConnection()
 	if connectedAddress == address {
+		log.Infof("connected to %s", address)
 		return
 	}
 
