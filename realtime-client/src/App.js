@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import logo from './de0gee-dog.png';
 import './App.css';
 import DataViewer from './DataViewer.js'
+import ChooseActivity from './ChooseActivity.js'
 
 class App extends Component {
   render() {
@@ -11,6 +12,7 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">de0gee</h1>
         </header>
+        <ChooseActivity />
         <DataViewer />
       </div>
     );
