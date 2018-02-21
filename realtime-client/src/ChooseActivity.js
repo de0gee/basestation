@@ -5,10 +5,7 @@ class ChooseActivity extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            radioprops: [
-                {label: 'param1', value: 0 },
-                {label: 'param2', value: 1 }
-              ],
+           value: "none",
         };
       }
 
@@ -18,10 +15,11 @@ class ChooseActivity extends React.Component {
     
     render() {
         return (
-          <div>
-              <strong>Classify activity:</strong>
-            <RadioGroup onChange={ this.onChange } horizontal>
-          <RadioButton value="none">
+          <div style={ { padding: 16 } }>
+            <h4 style={ { marginTop: 32 } }>Classify Activity</h4>
+
+            <RadioGroup onChange={ this.onChange } horizontal value={this.state.value}>
+          <RadioButton value="none" pointColor="#999999">
             None
           </RadioButton>
           <RadioButton value="apple">
