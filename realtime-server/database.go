@@ -20,6 +20,8 @@ type Database struct {
 	fileLock *flock.Flock
 }
 
+var possibleActivities = []string{"none", "walking", "running", "eating", "playing", "sleeping", "barking"}
+
 // Open will open the database for transactions by first aquiring a filelock.
 func Open(name string, readOnly ...bool) (d *Database, err error) {
 	d = new(Database)
@@ -63,7 +65,14 @@ func Open(name string, readOnly ...bool) (d *Database, err error) {
 		log.Debug("made tables")
 
 		for uuid := range characteristicDefinitions {
-			err = d.AddSensorID(characteristicDefinitions[uuid].Name, characteristicDefinitions[uuid].ID)
+			err = d.AddID("sensor", characteristicDefinitions[uuid].Name, characteristicDefinitions[uuid].ID)
+			if err != nil {
+				return
+			}
+		}
+
+		for i, activity := range possibleActivities {
+			err = d.AddID("activity", activity, i)
 			if err != nil {
 				return
 			}
@@ -121,15 +130,36 @@ func (d *Database) MakeTables() (err error) {
 		log.Error(err)
 		return
 	}
+	sqlStmt = `create table activities (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, timestamp TIMESTAMP, activity_id INTEGER);`
+	_, err = d.db.Exec(sqlStmt)
+	if err != nil {
+		err = errors.Wrap(err, "MakeTables")
+		log.Error(err)
+		return
+	}
+	sqlStmt = `CREATE TABLE activity_ids (id INTEGER PRIMARY KEY, name TEXT);`
+	_, err = d.db.Exec(sqlStmt)
+	if err != nil {
+		err = errors.Wrap(err, "MakeTables")
+		log.Error(err)
+		return
+	}
 	return
 }
 
-func (d *Database) AddSensorID(name string, id int) (err error) {
+func (d *Database) AddID(kind string, name string, id int) (err error) {
 	tx, err := d.db.Begin()
 	if err != nil {
 		return errors.Wrap(err, "Set")
 	}
-	stmt, err := tx.Prepare("insert into sensor_ids(id,name) values (?, ?)")
+	var stmt *sql.Stmt
+	if kind == "sensor" {
+		stmt, err = tx.Prepare("insert into sensor_ids(id,name) values (?, ?)")
+	} else if kind == "activity" {
+		stmt, err = tx.Prepare("insert into activity_ids(id,name) values (?, ?)")
+	} else {
+		err = errors.New("no such kind: " + kind)
+	}
 	if err != nil {
 		return errors.Wrap(err, "Set")
 	}
@@ -147,18 +177,30 @@ func (d *Database) AddSensorID(name string, id int) (err error) {
 	return
 }
 
-func (d *Database) AddSensor(id int, value int) (err error) {
+func (d *Database) Add(kind string, id int, value ...int) (err error) {
 	tx, err := d.db.Begin()
 	if err != nil {
 		return errors.Wrap(err, "AddSensor")
 	}
-	stmt, err := tx.Prepare("insert into sensors(timestamp,sensor_id,value) values (?, ?,?)")
+	var stmt *sql.Stmt
+	if kind == "sensor" {
+		stmt, err = tx.Prepare("insert into sensors(timestamp,sensor_id,value) values (?, ?,?)")
+	} else if kind == "activity" {
+		stmt, err = tx.Prepare("insert into activities(timestamp,activity_id) values (?, ?)")
+	} else {
+		err = errors.New("no such kind: " + kind)
+	}
 	if err != nil {
 		return errors.Wrap(err, "AddSensor")
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(time.Now(), id, value)
+	if kind == "sensor" {
+		_, err = stmt.Exec(time.Now(), id, value)
+	} else if kind == "activity" {
+		_, err = stmt.Exec(time.Now(), id)
+	}
+
 	if err != nil {
 		return errors.Wrap(err, "AddSensor")
 	}
@@ -166,6 +208,19 @@ func (d *Database) AddSensor(id int, value int) (err error) {
 	err = tx.Commit()
 	if err != nil {
 		return errors.Wrap(err, "AddSensor")
+	}
+	return
+}
+
+func (d *Database) GetLatestActivity() (activity string, err error) {
+	stmt, err := d.db.Prepare("SELECT activity_ids.name FROM activities INNER JOIN activity_ids ON activities.activity_id=activity_ids.id ORDER BY timestamp DESC LIMIT 1")
+	if err != nil {
+		return "", errors.Wrap(err, "problem preparing SQL")
+	}
+	defer stmt.Close()
+	err = stmt.QueryRow().Scan(&activity)
+	if err != nil {
+		return "", errors.Wrap(err, "problem getting key")
 	}
 	return
 }

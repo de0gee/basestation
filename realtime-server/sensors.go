@@ -78,10 +78,6 @@ func CollectData(address string) (err error) {
 
 	// read the values forever
 	options := make(map[string]dbus.Variant)
-	db, err := Open("sensors.db")
-	if err != nil {
-		return
-	}
 	for {
 		for uuid := range characteristics {
 			b, err2 := characteristics[uuid].characteristic.ReadValue(options)
@@ -110,7 +106,12 @@ func CollectData(address string) (err error) {
 				return errors.Wrap(err2, "could not encode "+characteristics[uuid].Name)
 			}
 			Broadcast(bPayload)
-			err2 = db.AddSensor(characteristics[uuid].ID, data)
+			db, err2 := Open("sensors.db")
+			if err2 != nil {
+				return errors.Wrap(err2, "could not open db")
+			}
+			err2 = db.Add("sensor", characteristics[uuid].ID, data)
+			db.Close()
 			if err2 != nil {
 				return errors.Wrap(err2, "could not add sensor")
 			}
