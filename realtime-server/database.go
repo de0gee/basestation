@@ -196,7 +196,7 @@ func (d *Database) Add(kind string, id int, value ...int) (err error) {
 	defer stmt.Close()
 
 	if kind == "sensor" {
-		_, err = stmt.Exec(time.Now(), id, value)
+		_, err = stmt.Exec(time.Now(), id, value[0])
 	} else if kind == "activity" {
 		_, err = stmt.Exec(time.Now(), id)
 	}

@@ -9,18 +9,34 @@ class DataViewer extends React.Component {
 
   constructor(props) {
     super(props);
+    const initialWidth = window.innerWidth > 0 ? window.innerWidth : 500;
+    console.log(initialWidth);
     this.state = {
       websocket_url: window.location.href.replace("http","ws").replace(":3000",":8002")+"ws",
-      componentWidth: 600,
       motion: [[{x:0,y:0}]],
       temperature: [[{x:0,y:0}]],
       ambient_light: [[{x:0,y:0}]],
       pressure: [[{x:0,y:0}]],
       humidity: [[{x:0,y:0}]],
       battery: [[{x:0,y:0}]],
+      showToolTip: false, 
+      componentWidth: initialWidth - 100,
     };
   }
 
+  componentDidMount() {
+    window.addEventListener('resize', this.handleResize.bind(this));
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.handleResize);
+  }
+
+  handleResize() {
+    this.setState({componentWidth: window.innerWidth - 100});
+  }
+
+ 
   handleData(payload) {
     let result = JSON.parse(payload);
     let values = this.state[result.name]

@@ -15,25 +15,25 @@ import (
 
 // Define characteristics
 var characteristicDefinitions = map[string]CharacteristicDefinition{
-	"00002a6e-0000-1000-8000-00805f9b34fb": CharacteristicDefinition{
+	"00002a6e-0000-1000-8000-00805f9b34fb": {
 		Name: "temperature", ValueType: "uint16_t", ID: 0,
 	},
-	"00002a6f-0000-1000-8000-00805f9b34fb": CharacteristicDefinition{
+	"00002a6f-0000-1000-8000-00805f9b34fb": {
 		Name: "humidity", ValueType: "uint8_t", ID: 1,
 	},
-	"c24229aa-d7e4-4438-a328-c2c548564643": CharacteristicDefinition{
+	"c24229aa-d7e4-4438-a328-c2c548564643": {
 		Name: "ambient_light", ValueType: "uint32_t", ID: 2,
 	},
 	// "61bf1164-529c-4140-9c61-3f5e4fb4c0c1": CharacteristicDefinition{
 	// 	Name: "uv_light", ValueType: "uint32_t",
 	// },
-	"2f256c42-cdef-4378-8e78-694ea0f53ea8": CharacteristicDefinition{
+	"2f256c42-cdef-4378-8e78-694ea0f53ea8": {
 		Name: "pressure", ValueType: "uint16_t", ID: 3,
 	},
-	"15e438b8-558e-4b1f-992f-23f90a8c129b": CharacteristicDefinition{
+	"15e438b8-558e-4b1f-992f-23f90a8c129b": {
 		Name: "motion", ValueType: "uint16_t", ID: 4,
 	},
-	"00002a19-0000-1000-8000-00805f9b34fb": CharacteristicDefinition{
+	"00002a19-0000-1000-8000-00805f9b34fb": {
 		Name: "battery", ValueType: "uint8_t", ID: 5,
 	},
 }
