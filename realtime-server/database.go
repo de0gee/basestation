@@ -111,6 +111,9 @@ func (d *Database) Dump() (err error) {
 	defer os.Remove(randFileName)
 	stdOut, _ := RunCommand(1*time.Minute, "./dump.sh")
 	err = ioutil.WriteFile(d.name+".sql", []byte(stdOut), 0755)
+	if err != nil {
+		return
+	}
 	return
 }
 

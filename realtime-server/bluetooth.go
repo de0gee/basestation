@@ -53,7 +53,7 @@ expect eof
 	RunCommand(30*time.Second, "expect run.sh "+address)
 
 	connectedAddress, err = CurrentConnection()
-	log.Debugf("current connected: %s", connectedAddress)
+	log.Infof("current connected: %s", connectedAddress)
 	if err != nil {
 		log.Warn(err)
 		return
@@ -67,10 +67,10 @@ expect eof
 }
 
 func CurrentConnection() (mac string, err error) {
-	log.Debugf("checking current connections")
+	log.Infof("checking current connections")
 	out, _ := RunCommand(1*time.Minute, "hcitool con")
 	validMac := regexp.MustCompile(`([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})`)
-	log.Debugf("hcitool con: %s", out)
+	log.Infof("hcitool con: %s", out)
 	for _, line := range strings.Split(out, "\n") {
 		macs := validMac.FindAllString(line, 1)
 		if len(macs) > 0 {

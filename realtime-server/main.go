@@ -101,9 +101,16 @@ func main() {
 		for {
 			log.Info("dumping the latest")
 			db, _ := Open("sensors.db")
-			db.Dump()
+			err := db.Dump()
+			if err != nil {
+				log.Error(err)
+			}
 			db.Close()
-			time.Sleep(10 * time.Minute)
+
+			// // patch it up to the server
+			// patchitup.SetLogLevel("critical")
+			// err = patchitup.PatchUp("https://data.de0gee.com", config.Username, d.name+".sql")
+			// time.Sleep(10 * time.Minute)
 		}
 	}()
 
