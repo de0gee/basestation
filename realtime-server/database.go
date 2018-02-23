@@ -77,6 +77,7 @@ func Open(name string, readOnly ...bool) (d *Database, err error) {
 				return
 			}
 		}
+		d.Add("activity", 0)
 	}
 
 	return
