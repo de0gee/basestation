@@ -49,8 +49,10 @@ class DataViewer extends React.Component {
       y: result.data
     })
     
-    this.state[result.name] = values;
-    this.setState(this.state)
+    var currentState = this.state
+    currentState[result.name] = values
+    // this.state[result.name] = values;
+    this.setState(currentState)
   }
 
   render() {

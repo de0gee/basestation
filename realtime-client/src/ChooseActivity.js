@@ -17,7 +17,7 @@ class ChooseActivity extends React.Component {
         axios.get(window.location.href.replace(":3000",":8002")+'activity')
         .then(function (response) {
           console.log(response);
-          if (response.data.success == true) {
+          if (response.data.success === true) {
             console.log(response.data.message);
             self.setState({value: response.data.message});
           } else {
@@ -47,7 +47,7 @@ class ChooseActivity extends React.Component {
       })
       .then(function (response) {
         console.log(response);
-        if (response.data.success == true) {
+        if (response.data.success === true) {
           Alert.success(response.data.message, {
             position: 'top-right',
             effect: 'flip',
