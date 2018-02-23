@@ -36,6 +36,7 @@ Make executable
 
 ```
 $ chmod +x ~/raspberry-pi-turnkey/startup.sh
+$ chmod +x ~/raspberry-pi-turnkey/expand_filesystem.sh
 ```
 
 Add to `~/raspberry-pi-turnkey/startup.py`:
