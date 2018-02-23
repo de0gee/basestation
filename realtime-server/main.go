@@ -15,7 +15,9 @@ const adapterID = "hci0"
 var addressOfDevice = ""
 
 func main() {
+	log.SetLevel(log.DebugLevel)
 	var err error
+
 	go func() {
 		err := startServer()
 		if err != nil {
@@ -23,7 +25,17 @@ func main() {
 		}
 	}()
 
-	log.SetLevel(log.DebugLevel)
+	// periodic dumps
+	go func() {
+		for {
+			log.Info("dumping the latest")
+			db, _ := Open("sensors.db")
+			db.Dump()
+			db.Close()
+			time.Sleep(10 * time.Minute)
+		}
+	}()
+
 	addressOfDevice, err = DiscoverDevice("BlueSense")
 	if err != nil {
 		log.Error(err)

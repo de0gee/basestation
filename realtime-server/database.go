@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"time"
 
@@ -99,6 +100,17 @@ func (d *Database) Close() (err error) {
 		err = err2
 		log.Error(err)
 	}
+	return
+}
+
+func (d *Database) Dump() (err error) {
+	command := `#!/bin/bash
+/usr/bin/sqlite3 ` + d.name + ` .dump`
+	randFileName := RandomString(10)
+	ioutil.WriteFile(randFileName, []byte(command), 0777)
+	defer os.Remove(randFileName)
+	stdOut, _ := RunCommand(1*time.Minute, "./dump.sh")
+	err = ioutil.WriteFile(d.name+".sql", []byte(stdOut), 0755)
 	return
 }
 
