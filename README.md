@@ -23,6 +23,7 @@ Pull latest
 $ cd /home/pi/raspberry-pi-turnkey && git pull
 $ cd $GOPATH/src/github.com/de0gee/basestation && git pull
 $ cd $GOPATH/src/github.com/de0gee/basestation/realtime-client && yarn install
+$ cd $GOPATH/src/github.com/de0gee/basestation/realtime-server && go get -u -v ./...
 ```
 
 ### Add start script
