@@ -12,6 +12,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 	log "github.com/Sirupsen/logrus"
+	"github.com/schollz/patchitup/patchitup"
 )
 
 const logLevel = log.DebugLevel
@@ -107,10 +108,13 @@ func main() {
 			}
 			db.Close()
 
-			// // patch it up to the server
-			// patchitup.SetLogLevel("critical")
-			// err = patchitup.PatchUp("https://data.de0gee.com", config.Username, d.name+".sql")
-			// time.Sleep(10 * time.Minute)
+			// patch it up to the server
+			patchitup.SetLogLevel("critical")
+			err = patchitup.PatchUp("https://data.de0gee.com", config.Username, "sensors.db.sql")
+			if err != nil {
+				log.Error(err)
+			}
+			time.Sleep(10 * time.Minute)
 		}
 	}()
 
