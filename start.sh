@@ -18,5 +18,6 @@ yarn install
 nohup yarn run start >/tmp/client.log 2>&1 &
 
 cd $GOPATH/src/github.com/de0gee/basestation/realtime-server
+go get -u -v ./...
 go build
 nohup sudo ./realtime-server >/tmp/server.log 2>&1 &
