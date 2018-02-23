@@ -73,9 +73,9 @@ class ChooseActivity extends React.Component {
     
     render() {
         return (
-          <div style={ { padding: 16 } } className="activities">
+          <div style={ { padding: 8 } } className="activities">
           <Alert stack={{limit: 3}} html={true} />
-            <h4 style={ { marginTop: 32 } }>Classify Activity</h4>
+            <h2 style={ { marginTop: 16 } }>Classify Activity:</h2>
 
             <RadioGroup onChange={ this.onChange } value={this.state.value}>
           <RadioButton value="none" pointColor="#999999">

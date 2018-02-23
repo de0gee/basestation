@@ -1,11 +1,16 @@
 package main
 
 import (
+	"bytes"
+	"flag"
+	"io/ioutil"
 	"os"
 	"os/signal"
+	"path"
 	"syscall"
 	"time"
 
+	"github.com/BurntSushi/toml"
 	log "github.com/Sirupsen/logrus"
 )
 
@@ -14,10 +19,76 @@ const adapterID = "hci0"
 
 var addressOfDevice = ""
 
+// Configuration is the specific configuration for this de0gee base station
+type Configuration struct {
+	Username string
+}
+
+var config Configuration
+
+func getConfiguration() (c Configuration, err error) {
+	if !Exists(path.Join(UserHomeDir(), ".de0gee")) {
+		os.MkdirAll(path.Join(UserHomeDir(), ".de0gee"), 0777)
+	}
+	configFile := path.Join(UserHomeDir(), ".de0gee", "config.toml")
+	if !Exists(configFile) {
+		// create new configuraiton
+		c = Configuration{
+			Username: RandomString(4),
+		}
+		// save the configuration
+		buf := new(bytes.Buffer)
+		err = toml.NewEncoder(buf).Encode(c)
+		if err != nil {
+			return
+		}
+		err = ioutil.WriteFile(configFile, buf.Bytes(), 0755)
+		return
+	}
+
+	// load configuration
+	bConfig, err := ioutil.ReadFile(configFile)
+	if err != nil {
+		return
+	}
+	err = toml.Unmarshal(bConfig, &c)
+	return
+}
+
 func main() {
-	log.SetLevel(log.DebugLevel)
+	var (
+		doDebug    bool
+		justServer bool
+	)
+	flag.BoolVar(&doDebug, "debug", false, "enable debugging")
+	flag.BoolVar(&justServer, "serve", false, "enable just the server")
+	flag.Parse()
+
+	if doDebug {
+		log.SetLevel(log.DebugLevel)
+	} else {
+		log.SetLevel(log.InfoLevel)
+	}
+
 	var err error
 
+	// setup config
+	config, err = getConfiguration()
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	log.Infof("running for %s", config.Username)
+
+	if justServer {
+		err := startServer()
+		if err != nil {
+			panic(err)
+		}
+		return
+	}
+
+	// start server
 	go func() {
 		err := startServer()
 		if err != nil {

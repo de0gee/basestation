@@ -23,6 +23,10 @@ func startServer() (err error) {
 	r.GET("/activity", handlerGetActivity)
 	r.POST("/activity", handlerPostActivity)
 	r.OPTIONS("/activity", handlerOK)
+
+	// get the username
+	r.GET("/username", handlerGetUsername)
+	r.OPTIONS("/username", handlerOK)
 	log.Infof("Running on 0.0.0.0:%s", "8002")
 
 	err = r.Run(":8002") // listen and serve on 0.0.0.0:8080
@@ -31,6 +35,13 @@ func startServer() (err error) {
 
 func handlerOK(c *gin.Context) { // handler for the uptime robot
 	c.String(http.StatusOK, "OK")
+}
+
+func handlerGetUsername(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"message": config.Username,
+		"success": true,
+	})
 }
 
 func handlerPostActivity(c *gin.Context) {

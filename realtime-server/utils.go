@@ -5,11 +5,25 @@ import (
 	"math/rand"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
 )
+
+// UserHomeDir returns the user home directory
+// taken from go1.8c2
+// https://stackoverflow.com/a/41786440
+func UserHomeDir() string {
+	env := "HOME"
+	if runtime.GOOS == "windows" {
+		env = "USERPROFILE"
+	} else if runtime.GOOS == "plan9" {
+		env = "home"
+	}
+	return os.Getenv(env)
+}
 
 func RunCommand(tDuration time.Duration, commands string) (string, string) {
 	command := strings.Fields(commands)

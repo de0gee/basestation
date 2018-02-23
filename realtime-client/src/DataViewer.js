@@ -56,6 +56,7 @@ class DataViewer extends React.Component {
   render() {
     return ( 
     <div>
+      <h2>Real-time data:</h2>
       <p> Motion </p> 
       <LineChart data = {this.state.motion}
       width = {this.state.componentWidth}
