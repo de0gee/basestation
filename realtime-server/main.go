@@ -12,7 +12,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 	log "github.com/Sirupsen/logrus"
-	"github.com/schollz/patchitup/patchitup"
+	// "github.com/schollz/patchitup/patchitup"
 )
 
 const logLevel = log.DebugLevel
@@ -98,25 +98,25 @@ func main() {
 	}()
 
 	// periodic dumps
-	go func() {
-		for {
-			log.Info("dumping the latest")
-			db, _ := Open("sensors.db")
-			err := db.Dump()
-			if err != nil {
-				log.Error(err)
-			}
-			db.Close()
+	// go func() {
+	// 	for {
+	// 		log.Info("dumping the latest")
+	// 		db, _ := Open("sensors.db")
+	// 		err := db.Dump()
+	// 		if err != nil {
+	// 			log.Error(err)
+	// 		}
+	// 		db.Close()
 
-			// patch it up to the server
-			patchitup.SetLogLevel("critical")
-			err = patchitup.PatchUp("https://data.de0gee.com", config.Username, "sensors.db.sql")
-			if err != nil {
-				log.Error(err)
-			}
-			time.Sleep(10 * time.Minute)
-		}
-	}()
+	// 		// patch it up to the server
+	// 		patchitup.SetLogLevel("critical")
+	// 		err = patchitup.PatchUp("https://data.de0gee.com", config.Username, "sensors.db.sql")
+	// 		if err != nil {
+	// 			log.Error(err)
+	// 		}
+	// 		time.Sleep(10 * time.Minute)
+	// 	}
+	// }()
 
 	addressOfDevice, err = DiscoverDevice("BlueSense")
 	if err != nil {
