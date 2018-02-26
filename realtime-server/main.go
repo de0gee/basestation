@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"flag"
 	"io/ioutil"
@@ -12,7 +13,8 @@ import (
 
 	"github.com/BurntSushi/toml"
 	log "github.com/Sirupsen/logrus"
-	// "github.com/schollz/patchitup/patchitup"
+	"github.com/schollz/patchitup-encrypted/patchitup"
+	"github.com/schollz/sqlitedump"
 )
 
 const logLevel = log.DebugLevel
@@ -97,26 +99,42 @@ func main() {
 		}
 	}()
 
-	// periodic dumps
-	// go func() {
-	// 	for {
-	// 		log.Info("dumping the latest")
-	// 		db, _ := Open("sensors.db")
-	// 		err := db.Dump()
-	// 		if err != nil {
-	// 			log.Error(err)
-	// 		}
-	// 		db.Close()
+	go func() {
+		for {
+			time.Sleep(10 * time.Minute)
+			log.Info("dumping the latest")
+			os.Remove("senosrs.db.sql")
+			f, err := os.Create("sensors.db.sql")
+			if err != nil {
+				log.Warn(err)
+				continue
+			}
+			w := bufio.NewWriter(f)
+			err = sqlitedump.Dump("sensors.db", w)
+			if err != nil {
+				log.Warn(err)
+				continue
+			}
+			f.Close()
 
-	// 		// patch it up to the server
-	// 		patchitup.SetLogLevel("critical")
-	// 		err = patchitup.PatchUp("https://data.de0gee.com", config.Username, "sensors.db.sql")
-	// 		if err != nil {
-	// 			log.Error(err)
-	// 		}
-	// 		time.Sleep(10 * time.Minute)
-	// 	}
-	// }()
+			// patch it up to the server
+			patchitup.SetLogLevel("critical")
+			patchitup.DataFolder = "."
+			p, err := patchitup.New(patchitup.Configuration{
+				ServerAddress: "https://data.de0gee.com",
+				PathToFile:    "sensors.db.sql",
+			})
+			if err != nil {
+				log.Warn(err)
+				continue
+			}
+			err = p.PatchUp()
+			if err != nil {
+				log.Error(err)
+				continue
+			}
+		}
+	}()
 
 	addressOfDevice, err = DiscoverDevice("BlueSense")
 	if err != nil {

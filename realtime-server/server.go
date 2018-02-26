@@ -8,6 +8,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
+	"github.com/schollz/patchitup-encrypted/patchitup"
 )
 
 func startServer() (err error) {
@@ -38,8 +39,15 @@ func handlerOK(c *gin.Context) { // handler for the uptime robot
 }
 
 func handlerGetUsername(c *gin.Context) {
+	patchitup.DataFolder = "."
+	p, _ := patchitup.New(patchitup.Configuration{
+		ServerAddress: "https://data.de0gee.com",
+		PathToFile:    "sensors.db.sql",
+	})
+	public, private := p.KeyPair()
+
 	c.JSON(http.StatusOK, gin.H{
-		"message": config.Username,
+		"message": public + "-" + private,
 		"success": true,
 	})
 }

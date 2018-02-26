@@ -24,7 +24,8 @@ class ShowUserData extends React.Component {
     render() {
         return (
           <span>
-            <h2>Username: <h1>{this.state.username}</h1></h2>
+            <h1>Username:</h1>
+            <small>{this.state.username}</small>
           </span>
         );
       }
