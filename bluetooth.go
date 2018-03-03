@@ -50,8 +50,9 @@ func startBluetooth(name string) (err error) {
 		log.Errorf("can't new device : %s", err)
 		return
 	}
-	ble.SetDefaultDevice(d)
+	defer d.Stop()
 
+	ble.SetDefaultDevice(d)
 	// Default to search device with name of Gopher (or specified by user).
 	filter := func(a ble.Advertisement) bool {
 		return strings.ToUpper(a.LocalName()) == strings.ToUpper(name)
@@ -65,7 +66,7 @@ func startBluetooth(name string) (err error) {
 	}
 
 	// Scan for specified durantion, or until interrupted by user.
-	log.Debug("Scanning for %s...", sd)
+	log.Debug("Scanning for %s...", sd.String())
 	ctx := ble.WithSigHandler(context.WithTimeout(context.Background(), sd))
 	cln, err := ble.Connect(ctx, filter)
 	if err != nil {
@@ -101,9 +102,13 @@ func startBluetooth(name string) (err error) {
 	}()
 	t := time.NewTicker(500 * time.Millisecond)
 	counter := float64(0)
+
 loop:
 	for {
-		explore(cln, p, counter)
+		err = explore(cln, p, counter)
+		if err != nil {
+			break loop
+		}
 		select {
 		case <-quit:
 			break loop
@@ -117,7 +122,7 @@ loop:
 	cln.CancelConnection()
 
 	<-done
-	return nil
+	return err
 }
 
 func explore(cln ble.Client, p *ble.Profile, counter float64) error {
@@ -183,7 +188,6 @@ func explore(cln ble.Client, p *ble.Profile, counter float64) error {
 				err = wireData(packet)
 				if err != nil {
 					log.Error(err)
-					return err
 				}
 
 			}

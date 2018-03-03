@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"time"
 
 	log "github.com/cihub/seelog"
 	cloud "github.com/de0gee/de0gee-cloud/src"
@@ -53,9 +54,12 @@ func main() {
 		return
 	}
 
-	err = startBluetooth("BlueSense")
-	if err != nil {
+	for {
+		time.Sleep(1 * time.Second)
+		err = startBluetooth("BlueSense")
+		if err == nil {
+			break
+		}
 		log.Error(err)
-		return
 	}
 }
