@@ -100,9 +100,9 @@ func startBluetooth(name string) (err error) {
 		<-c
 		close(quit)
 	}()
-	t := time.NewTicker(500 * time.Millisecond)
-	counter := float64(0)
 
+	t := time.NewTicker(50 * time.Millisecond)
+	counter := float64(0)
 loop:
 	for {
 		err = explore(cln, p, counter)
@@ -163,21 +163,39 @@ func explore(cln ble.Client, p *ble.Profile, counter float64) error {
 					packet.SensorValue = int(binary.LittleEndian.Uint32(b))
 				case "special":
 					packet.SensorValue = int(binary.LittleEndian.Uint16(b[0:2]))
+					if packet.SensorValue < int(math.Pow(2, 16)/2) {
+						packet.SensorValue += int(math.Pow(2, 16))
+					}
+
 					log.Debugf("%s1: %x %d", definedCharacteristics[c.UUID.String()].info.Name, b[0:2], packet.SensorValue)
 					err = wireData(packet)
 					if err != nil {
 						log.Error(err)
 					}
-					packet.SensorValue = int(binary.LittleEndian.Uint16(b[2:4]))
-					log.Debugf("%s2: %x %d", definedCharacteristics[c.UUID.String()].info.Name, b[2:4], packet.SensorValue)
+
 					packet.SensorID++
+
+					packet.SensorValue = int(binary.LittleEndian.Uint16(b[2:4]))
+					if packet.SensorValue < int(math.Pow(2, 16)/2) {
+						packet.SensorValue += int(math.Pow(2, 16))
+					}
+
+					log.Debugf("%s2: %x %d", definedCharacteristics[c.UUID.String()].info.Name, b[2:4], packet.SensorValue)
+					if packet.SensorValue < int(math.Pow(2, 16)/2) {
+						packet.SensorValue += int(math.Pow(2, 16))
+					}
 					err = wireData(packet)
 					if err != nil {
 						log.Error(err)
 					}
-					packet.SensorValue = int(binary.LittleEndian.Uint16(b[4:6]))
-					log.Debugf("%s3: %x %d", definedCharacteristics[c.UUID.String()].info.Name, b[4:6], packet.SensorValue)
+
 					packet.SensorID++
+					packet.SensorValue = int(binary.LittleEndian.Uint16(b[4:6]))
+					if packet.SensorValue < int(math.Pow(2, 16)/2) {
+						packet.SensorValue += int(math.Pow(2, 16))
+					}
+					log.Debugf("%s3: %x %d", definedCharacteristics[c.UUID.String()].info.Name, b[4:6], packet.SensorValue)
+
 					err = wireData(packet)
 					if err != nil {
 						log.Error(err)
