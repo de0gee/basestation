@@ -2,7 +2,8 @@ package main
 
 import (
 	"context"
-	"flag"
+	"encoding/binary"
+	"math"
 	"os"
 	"os/signal"
 	"strings"
@@ -10,20 +11,39 @@ import (
 	"time"
 
 	log "github.com/cihub/seelog"
+	cloud "github.com/de0gee/de0gee-cloud/src"
 
 	"github.com/currantlabs/ble"
 	"github.com/currantlabs/ble/examples/lib/dev"
 )
 
 var (
-	device = "default"
-	addr   = ""
-	sub    = 0
-	sd     = 10 * time.Second
+	device                 = "default"
+	addr                   = ""
+	sub                    = 0
+	sd                     = 10 * time.Second
+	definedCharacteristics map[string]charDefinitions
 )
 
+type charDefinitions struct {
+	info cloud.CharacteristicDefinition
+}
+
 func startBluetooth(name string) (err error) {
-	flag.Parse()
+	// define characteristics
+	definedCharacteristics = make(map[string]charDefinitions)
+	for i := range cloud.CharacteristicDefinitions {
+		if cloud.CharacteristicDefinitions[i].ValueType == "" {
+			continue
+		}
+		uuidName := strings.ToLower(strings.Replace(cloud.CharacteristicDefinitions[i].UUID, "-", "", -1))
+		if strings.HasPrefix(cloud.CharacteristicDefinitions[i].UUID, "0000") {
+			uuidName = strings.Split(cloud.CharacteristicDefinitions[i].UUID, "-")[0][4:]
+		}
+		definedCharacteristics[uuidName] = charDefinitions{
+			info: cloud.CharacteristicDefinitions[i],
+		}
+	}
 
 	d, err := dev.NewDevice(device)
 	if err != nil {
@@ -80,14 +100,15 @@ func startBluetooth(name string) (err error) {
 		close(quit)
 	}()
 	t := time.NewTicker(500 * time.Millisecond)
+	counter := float64(0)
 loop:
 	for {
-		explore(cln, p)
+		explore(cln, p, counter)
 		select {
 		case <-quit:
 			break loop
 		case <-t.C:
-			continue
+			counter++
 		}
 	}
 
@@ -99,20 +120,69 @@ loop:
 	return nil
 }
 
-func explore(cln ble.Client, p *ble.Profile) error {
+func explore(cln ble.Client, p *ble.Profile, counter float64) error {
 	for _, s := range p.Services {
-		log.Debugf("    Service: %s %s, Handle (0x%02X)", s.UUID, ble.Name(s.UUID), s.Handle)
-
+		// log.Debugf("    Service: %s %s, Handle (0x%02X)", s.UUID, ble.Name(s.UUID), s.Handle)
 		for _, c := range s.Characteristics {
-			log.Debugf("      Characteristic: %s %s",
-				c.UUID, ble.Name(c.UUID))
+			if _, ok := definedCharacteristics[c.UUID.String()]; !ok {
+				// log.Debugf("dont have %s", c.UUID)
+				continue
+			}
+			if math.Mod(counter, float64(definedCharacteristics[c.UUID.String()].info.SkipSteps)) != 0 {
+				continue
+			}
+			// log.Debugf("      Characteristic: %s %s",
+			// 	c.UUID, ble.Name(c.UUID))
 			if (c.Property & ble.CharRead) != 0 {
 				b, err := cln.ReadCharacteristic(c)
 				if err != nil {
 					log.Debugf("Failed to read characteristic: %s", err)
 					return err
 				}
-				log.Debugf("        Value         %x | %q", b, b)
+				log.Debugf("%s: %x %d", definedCharacteristics[c.UUID.String()].info.Name, b, len(b))
+
+				// parse the read data
+				if len(b) == 0 {
+					continue
+				}
+				packet := cloud.PostSensorData{
+					Timestamp: time.Now().UTC().UnixNano() / int64(time.Millisecond),
+					SensorID:  definedCharacteristics[c.UUID.String()].info.ID,
+				}
+				switch definedCharacteristics[c.UUID.String()].info.ValueType {
+				case "uint8_t":
+					packet.SensorValue = int(b[0])
+				case "uint16_t":
+					packet.SensorValue = int(binary.LittleEndian.Uint16(b))
+				case "uint32_t":
+					packet.SensorValue = int(binary.LittleEndian.Uint32(b))
+				case "special":
+					packet.SensorValue = int(binary.LittleEndian.Uint16(b[0:2]))
+					err = wireData(packet)
+					if err != nil {
+						log.Error(err)
+					}
+					packet.SensorValue = int(binary.LittleEndian.Uint16(b[2:4]))
+					packet.SensorID++
+					err = wireData(packet)
+					if err != nil {
+						log.Error(err)
+					}
+					packet.SensorValue = int(binary.LittleEndian.Uint16(b[4:6]))
+					packet.SensorID++
+					err = wireData(packet)
+					if err != nil {
+						log.Error(err)
+					}
+					continue
+				}
+				log.Debugf("%+v", packet)
+				err = wireData(packet)
+				if err != nil {
+					log.Error(err)
+					return err
+				}
+
 			}
 
 		}
