@@ -1,140 +1,61 @@
 package main
 
 import (
-	"bufio"
-	"bytes"
+	"encoding/json"
 	"flag"
-	"io/ioutil"
 	"os"
 	"os/signal"
-	"path"
 	"syscall"
 	"time"
 
-	"github.com/BurntSushi/toml"
-	log "github.com/Sirupsen/logrus"
-	"github.com/schollz/patchitup-encrypted/patchitup"
-	"github.com/schollz/sqlitedump"
+	log "github.com/cihub/seelog"
+	cloud "github.com/de0gee/de0gee-cloud/src"
 )
 
-const logLevel = log.DebugLevel
 const adapterID = "hci0"
 
 var addressOfDevice = ""
 
-// Configuration is the specific configuration for this de0gee base station
-type Configuration struct {
-	Username string
-}
-
-var config Configuration
-
-func getConfiguration() (c Configuration, err error) {
-	if !Exists(path.Join(UserHomeDir(), ".de0gee")) {
-		os.MkdirAll(path.Join(UserHomeDir(), ".de0gee"), 0777)
-	}
-	configFile := path.Join(UserHomeDir(), ".de0gee", "config.toml")
-	if !Exists(configFile) {
-		// create new configuraiton
-		c = Configuration{
-			Username: RandomString(4),
-		}
-		// save the configuration
-		buf := new(bytes.Buffer)
-		err = toml.NewEncoder(buf).Encode(c)
-		if err != nil {
-			return
-		}
-		err = ioutil.WriteFile(configFile, buf.Bytes(), 0755)
-		return
-	}
-
-	// load configuration
-	bConfig, err := ioutil.ReadFile(configFile)
-	if err != nil {
-		return
-	}
-	err = toml.Unmarshal(bConfig, &c)
-	return
-}
+var (
+	doDebug     bool
+	Username    string
+	Password    string
+	CloudServer string
+	APIKey      string
+)
 
 func main() {
-	var (
-		doDebug    bool
-		justServer bool
-	)
+	defer log.Flush()
+	var err error
 	flag.BoolVar(&doDebug, "debug", false, "enable debugging")
-	flag.BoolVar(&justServer, "serve", false, "enable just the server")
+	flag.StringVar(&Username, "user", "", "username")
+	flag.StringVar(&Password, "pass", "", "passphrase")
+	flag.StringVar(&CloudServer, "cloud", "http://localhost:8002", "address of cloud server")
 	flag.Parse()
 
 	if doDebug {
-		log.SetLevel(log.DebugLevel)
+		SetLogLevel("debug")
 	} else {
-		log.SetLevel(log.InfoLevel)
+		SetLogLevel("info")
 	}
 
-	var err error
-
-	// setup config
-	config, err = getConfiguration()
+	// log into the cloud
+	payloadBytes, _ := json.Marshal(cloud.LoginJSON{
+		Username: Username,
+		Password: Password,
+	})
+	target, err := uploadToServer(payloadBytes, "login")
 	if err != nil {
 		log.Error(err)
 		return
 	}
-	log.Infof("running for %s", config.Username)
+	APIKey = target.Message
 
-	if justServer {
-		err := startServer()
-		if err != nil {
-			panic(err)
-		}
+	err = setupWebsockets()
+	if err != nil {
+		log.Error(err)
 		return
 	}
-
-	// start server
-	go func() {
-		err := startServer()
-		if err != nil {
-			panic(err)
-		}
-	}()
-
-	go func() {
-		for {
-			time.Sleep(10 * time.Minute)
-			log.Info("dumping the latest")
-			os.Remove("senosrs.db.sql")
-			f, err := os.Create("sensors.db.sql")
-			if err != nil {
-				log.Warn(err)
-				continue
-			}
-			w := bufio.NewWriter(f)
-			err = sqlitedump.Dump("sensors.db", w)
-			if err != nil {
-				log.Warn(err)
-				continue
-			}
-			f.Close()
-
-			// patch it up to the server
-			patchitup.SetLogLevel("critical")
-			patchitup.DataFolder = "."
-			p, err := patchitup.New(patchitup.Configuration{
-				ServerAddress: "https://data.de0gee.com",
-				PathToFile:    "sensors.db.sql",
-			})
-			if err != nil {
-				log.Warn(err)
-				continue
-			}
-			err = p.PatchUp()
-			if err != nil {
-				log.Error(err)
-				continue
-			}
-		}
-	}()
 
 	addressOfDevice, err = DiscoverDevice("BlueSense")
 	if err != nil {
@@ -147,7 +68,7 @@ func main() {
 	go func() {
 		<-c
 		DisconnectToBluetooth(addressOfDevice)
-		os.Exit(1)
+		return
 	}()
 	for {
 		err = connectAndRetrieveData()
