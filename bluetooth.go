@@ -3,7 +3,10 @@ package main
 import (
 	"context"
 	"flag"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	log "github.com/cihub/seelog"
@@ -69,7 +72,24 @@ func startBluetooth(name string) (err error) {
 	}
 
 	// Start the exploration.
-	explore(cln, p)
+	quit := make(chan struct{})
+	c := make(chan os.Signal, 2)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		close(quit)
+	}()
+	t := time.NewTicker(500 * time.Millisecond)
+loop:
+	for {
+		explore(cln, p)
+		select {
+		case <-quit:
+			break loop
+		case <-t.C:
+			continue
+		}
+	}
 
 	// Disconnect the connection. (On OS X, this might take a while.)
 	log.Debugf("Disconnecting [ %s ]... (this might take up to few seconds on OS X)", cln.Address())
@@ -90,7 +110,7 @@ func explore(cln ble.Client, p *ble.Profile) error {
 				b, err := cln.ReadCharacteristic(c)
 				if err != nil {
 					log.Debugf("Failed to read characteristic: %s", err)
-					continue
+					return err
 				}
 				log.Debugf("        Value         %x | %q", b, b)
 			}
