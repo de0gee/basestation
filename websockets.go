@@ -20,6 +20,12 @@ func wireData(sensorData cloud.PostSensorData) (err error) {
 	if err != nil {
 		return
 	}
+	if conn == nil {
+		err = setupWebsockets()
+		if err != nil {
+			return
+		}
+	}
 	errWrite := conn.WriteMessage(websocket.TextMessage, data)
 	if errWrite != nil {
 		conn.Close()

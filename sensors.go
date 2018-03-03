@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/binary"
+	"fmt"
 	"math"
+	"os"
 	"time"
 
 	log "github.com/cihub/seelog"
@@ -31,15 +33,33 @@ func CollectData(address string) (err error) {
 		return
 	}
 
+	charList, err := dev.GetCharsList()
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	for _, ch := range charList {
+		log.Debug(ch)
+		ch2, err2 := dev.GetChar(fmt.Sprintf("%s", ch))
+		if err2 != nil {
+			log.Error(err2)
+		}
+		log.Debug(ch2.Properties.UUID)
+	}
+	log.Flush()
+	os.Exit(1)
+
 	characteristics := make(map[string]characteristicDefinitionInternal)
 	for i := range cloud.CharacteristicDefinitions {
+		if cloud.CharacteristicDefinitions[i].ValueType == "" {
+			continue
+		}
+		log.Debug(dev.GetAllServicesAndUUID())
 		c, err2 := dev.GetCharByUUID(cloud.CharacteristicDefinitions[i].UUID)
 		if err2 != nil {
 			err = errors.Wrap(err2, "uuid: "+cloud.CharacteristicDefinitions[i].UUID)
+			log.Warn(err)
 			return
-		}
-		if cloud.CharacteristicDefinitions[i].ValueType == "" {
-			continue
 		}
 		characteristics[cloud.CharacteristicDefinitions[i].UUID] = characteristicDefinitionInternal{
 			gatt: c,
@@ -66,7 +86,6 @@ func CollectData(address string) (err error) {
 				continue
 			}
 			packet := cloud.PostSensorData{
-				APIKey:    APIKey,
 				Timestamp: time.Now().UTC().UnixNano() / int64(time.Millisecond),
 				SensorID:  characteristics[uuid].info.ID,
 			}
@@ -78,6 +97,23 @@ func CollectData(address string) (err error) {
 			case "uint32_t":
 				packet.SensorValue = int(binary.LittleEndian.Uint32(b))
 			case "special":
+				packet.SensorValue = int(binary.LittleEndian.Uint16(b[0:2]))
+				err = wireData(packet)
+				if err != nil {
+					log.Error(err)
+				}
+				packet.SensorValue = int(binary.LittleEndian.Uint16(b[2:4]))
+				packet.SensorID++
+				err = wireData(packet)
+				if err != nil {
+					log.Error(err)
+				}
+				packet.SensorValue = int(binary.LittleEndian.Uint16(b[4:6]))
+				packet.SensorID++
+				err = wireData(packet)
+				if err != nil {
+					log.Error(err)
+				}
 				continue
 			}
 			log.Debugf("%+v", packet)
