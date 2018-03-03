@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 
+	log "github.com/cihub/seelog"
 	cloud "github.com/de0gee/de0gee-cloud/src"
 	"github.com/gorilla/websocket"
 )
@@ -16,6 +17,7 @@ func setupWebsockets() (err error) {
 }
 
 func wireData(sensorData cloud.PostSensorData) (err error) {
+	log.Debugf("data: %+v", sensorData)
 	data, err := json.Marshal(sensorData)
 	if err != nil {
 		return

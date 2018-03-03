@@ -158,17 +158,20 @@ func explore(cln ble.Client, p *ble.Profile, counter float64) error {
 					packet.SensorValue = int(binary.LittleEndian.Uint32(b))
 				case "special":
 					packet.SensorValue = int(binary.LittleEndian.Uint16(b[0:2]))
+					log.Debugf("%s1: %x %d", definedCharacteristics[c.UUID.String()].info.Name, b[0:2], packet.SensorValue)
 					err = wireData(packet)
 					if err != nil {
 						log.Error(err)
 					}
 					packet.SensorValue = int(binary.LittleEndian.Uint16(b[2:4]))
+					log.Debugf("%s2: %x %d", definedCharacteristics[c.UUID.String()].info.Name, b[2:4], packet.SensorValue)
 					packet.SensorID++
 					err = wireData(packet)
 					if err != nil {
 						log.Error(err)
 					}
 					packet.SensorValue = int(binary.LittleEndian.Uint16(b[4:6]))
+					log.Debugf("%s3: %x %d", definedCharacteristics[c.UUID.String()].info.Name, b[4:6], packet.SensorValue)
 					packet.SensorID++
 					err = wireData(packet)
 					if err != nil {
