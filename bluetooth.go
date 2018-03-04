@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/binary"
 	"math"
@@ -162,47 +163,31 @@ func explore(cln ble.Client, p *ble.Profile, counter float64) error {
 				case "uint32_t":
 					packet.SensorValue = int(binary.LittleEndian.Uint32(b))
 				case "special":
-					packet.SensorValue = int(binary.LittleEndian.Uint16(b[0:2]))
-					if packet.SensorValue < int(math.Pow(2, 16)/2) {
-						packet.SensorValue += int(math.Pow(2, 16))
+					var val int16
+					websocketPacket := cloud.PostWebsocket{
+						Timestamp: packet.Timestamp,
+						Sensors:   make(map[int]int),
 					}
 
-					log.Debugf("%s1: %x %d", definedCharacteristics[c.UUID.String()].info.Name, b[0:2], packet.SensorValue)
-					err = wireData(packet)
-					if err != nil {
-						log.Error(err)
-					}
+					binary.Read(bytes.NewBuffer(b[0:2]), binary.LittleEndian, &val)
+					websocketPacket.Sensors[packet.SensorID] = int(val)
 
 					packet.SensorID++
-
-					packet.SensorValue = int(binary.LittleEndian.Uint16(b[2:4]))
-					if packet.SensorValue < int(math.Pow(2, 16)/2) {
-						packet.SensorValue += int(math.Pow(2, 16))
-					}
-
-					log.Debugf("%s2: %x %d", definedCharacteristics[c.UUID.String()].info.Name, b[2:4], packet.SensorValue)
-					if packet.SensorValue < int(math.Pow(2, 16)/2) {
-						packet.SensorValue += int(math.Pow(2, 16))
-					}
-					err = wireData(packet)
-					if err != nil {
-						log.Error(err)
-					}
+					binary.Read(bytes.NewBuffer(b[2:4]), binary.LittleEndian, &val)
+					websocketPacket.Sensors[packet.SensorID] = int(val)
 
 					packet.SensorID++
-					packet.SensorValue = int(binary.LittleEndian.Uint16(b[4:6]))
-					if packet.SensorValue < int(math.Pow(2, 16)/2) {
-						packet.SensorValue += int(math.Pow(2, 16))
-					}
-					log.Debugf("%s3: %x %d", definedCharacteristics[c.UUID.String()].info.Name, b[4:6], packet.SensorValue)
+					binary.Read(bytes.NewBuffer(b[4:6]), binary.LittleEndian, &val)
+					websocketPacket.Sensors[packet.SensorID] = int(val)
 
-					err = wireData(packet)
+					log.Debug("%+v", websocketPacket)
+					err = wireData2(websocketPacket)
 					if err != nil {
 						log.Error(err)
 					}
 					continue
 				}
-				log.Debugf("%+v", packet)
+				// log.Debugf("%+v", packet)
 				err = wireData(packet)
 				if err != nil {
 					log.Error(err)
