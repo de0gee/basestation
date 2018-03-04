@@ -127,6 +127,11 @@ loop:
 }
 
 func explore(cln ble.Client, p *ble.Profile, counter float64) error {
+	websocketPacket := cloud.PostWebsocket{
+		Timestamp: time.Now().UTC().UnixNano() / int64(time.Millisecond),
+		Sensors:   make(map[int]int),
+	}
+
 	for _, s := range p.Services {
 		// log.Debugf("    Service: %s %s, Handle (0x%02X)", s.UUID, ble.Name(s.UUID), s.Handle)
 		for _, c := range s.Characteristics {
@@ -151,50 +156,39 @@ func explore(cln ble.Client, p *ble.Profile, counter float64) error {
 				if len(b) == 0 {
 					continue
 				}
-				packet := cloud.PostSensorData{
-					Timestamp: time.Now().UTC().UnixNano() / int64(time.Millisecond),
-					SensorID:  definedCharacteristics[c.UUID.String()].info.ID,
-				}
 				switch definedCharacteristics[c.UUID.String()].info.ValueType {
 				case "uint8_t":
-					packet.SensorValue = int(b[0])
+					websocketPacket.Sensors[definedCharacteristics[c.UUID.String()].info.ID] = int(b[0])
 				case "uint16_t":
-					packet.SensorValue = int(binary.LittleEndian.Uint16(b))
+					websocketPacket.Sensors[definedCharacteristics[c.UUID.String()].info.ID] = int(binary.LittleEndian.Uint16(b))
 				case "uint32_t":
-					packet.SensorValue = int(binary.LittleEndian.Uint32(b))
+					websocketPacket.Sensors[definedCharacteristics[c.UUID.String()].info.ID] = int(binary.LittleEndian.Uint32(b))
 				case "special":
 					var val int16
-					websocketPacket := cloud.PostWebsocket{
-						Timestamp: packet.Timestamp,
-						Sensors:   make(map[int]int),
-					}
-
+					id := definedCharacteristics[c.UUID.String()].info.ID
 					binary.Read(bytes.NewBuffer(b[0:2]), binary.LittleEndian, &val)
-					websocketPacket.Sensors[packet.SensorID] = int(val)
+					websocketPacket.Sensors[id] = int(val)
 
-					packet.SensorID++
+					id++
 					binary.Read(bytes.NewBuffer(b[2:4]), binary.LittleEndian, &val)
-					websocketPacket.Sensors[packet.SensorID] = int(val)
+					websocketPacket.Sensors[id] = int(val)
 
-					packet.SensorID++
+					id++
 					binary.Read(bytes.NewBuffer(b[4:6]), binary.LittleEndian, &val)
-					websocketPacket.Sensors[packet.SensorID] = int(val)
+					websocketPacket.Sensors[id] = int(val)
 
-					log.Debug("%+v", websocketPacket)
-					err = wireData2(websocketPacket)
-					if err != nil {
-						log.Error(err)
-					}
 					continue
-				}
-				// log.Debugf("%+v", packet)
-				err = wireData(packet)
-				if err != nil {
-					log.Error(err)
 				}
 
 			}
 
+		}
+	}
+	// log.Debugf("%+v", packet)
+	if len(websocketPacket.Sensors) > 0 {
+		err := wireData2(websocketPacket)
+		if err != nil {
+			log.Error(err)
 		}
 	}
 	return nil
