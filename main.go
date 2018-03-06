@@ -67,7 +67,7 @@ func main() {
 		}
 	}
 	// log into the cloud
-	payloadBytes, _ := json.Marshal()
+	payloadBytes, _ := json.Marshal(loginJSON)
 	target, err := uploadToServer(payloadBytes, "login")
 	if err != nil {
 		log.Error(err)
