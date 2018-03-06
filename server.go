@@ -39,7 +39,8 @@ func startServer() {
 			})
 		} else {
 			log.Debugf("redirecting to %s", CloudServer+"/realtime?apikey="+target.Message)
-			ioutil.WriteFile("apikey", []byte(target.Message), 0755)
+			dataBytes, _ := json.Marshal(data)
+			ioutil.WriteFile("authentication", dataBytes, 0755)
 			c.Redirect(http.StatusMovedPermanently, CloudServer+"/realtime?apikey="+target.Message)
 		}
 	})

@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"io/ioutil"
 	"os"
 	"time"
 
@@ -44,18 +45,29 @@ func main() {
 
 	// wait until an API key exists
 	for {
-		if _, err := os.Stat("apikey"); err == nil {
+		if _, err := os.Stat("authentication"); err == nil {
 			// path/to/whatever exists
 			break
 		}
 		time.Sleep(1 * time.Second)
 	}
 
+	var loginJSON cloud.LoginJSON
+	if Username != "" && Password != "" {
+		loginJSON = cloud.LoginJSON{
+			Username: Username,
+			Password: Password,
+		}
+	} else {
+		loginBytes, _ := ioutil.ReadFile("authentication")
+		err = json.Unmarshal(loginBytes, &loginJSON)
+		if err != nil {
+			log.Error(err)
+			return
+		}
+	}
 	// log into the cloud
-	payloadBytes, _ := json.Marshal(cloud.LoginJSON{
-		Username: Username,
-		Password: Password,
-	})
+	payloadBytes, _ := json.Marshal()
 	target, err := uploadToServer(payloadBytes, "login")
 	if err != nil {
 		log.Error(err)
