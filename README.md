@@ -9,12 +9,7 @@ In the near-future, these instructions will be compiled into a single script.
 Start from https://github.com/schollz/raspberry-pi-turnkey
 
 ```
-$ go get -u -v github.com/de0gee/basestation/...
-```
-
-```
-$ sudo apt-get install -y expect
-$ sudo npm install -g yarn
+$ go get -u -v github.com/de0gee/basestation
 ```
 
 Pull latest 
@@ -22,8 +17,6 @@ Pull latest
 ```
 $ cd /home/pi/raspberry-pi-turnkey && git pull
 $ cd $GOPATH/src/github.com/de0gee/basestation && git pull
-$ cd $GOPATH/src/github.com/de0gee/basestation/realtime-client && yarn install
-$ cd $GOPATH/src/github.com/de0gee/basestation/realtime-server && go get -u -v ./...
 ```
 
 ### Add start script
@@ -42,7 +35,7 @@ $ chmod +x ~/raspberry-pi-turnkey/expand_filesystem.sh
 Add to `~/raspberry-pi-turnkey/startup.py`:
 
 ```python
-r = requests.post("https://snaptext.live",data=json.dumps({"message":"Goto de0gee at: <a href='http://{}:3000'>{}:3000</a>".format(ipaddress,ipaddress),"to":piid,"from":"Raspberry Pi Turnkey"}))
+r = requests.post("https://snaptext.live",data=json.dumps({"message":"Log in to de0gee at: <a href='http://{}:8005'>{}:8005</a>".format(ipaddress,ipaddress),"to":piid,"from":"Raspberry Pi Turnkey"}))
 ```
 
 *(save as de0gee-intermediate.img)*
