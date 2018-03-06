@@ -157,11 +157,12 @@
         <div class="text-center mb-4">
             <img class="mb-4" src="https://www.de0gee.com/img/de0gee.png" alt="" width="200">
             <p>Sign into the cloud with your email and password.</p>
-            {{ if .BadSignin }}
+            {{ with .Message }}
             <div class="alert alert-danger" role="alert">
-                Incorrect passphrase.
+                {{.}}
             </div>
             {{ end }}
+
         </div>
 
         <div class="form-label-group">

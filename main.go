@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"os"
 	"time"
 
 	log "github.com/cihub/seelog"
@@ -28,7 +29,7 @@ func main() {
 	flag.StringVar(&addressOfDevice, "device", "", "address of BlueSense device")
 	flag.StringVar(&Username, "user", "", "username")
 	flag.StringVar(&Password, "pass", "", "passphrase")
-	flag.StringVar(&CloudServer, "cloud", "http://localhost:8002", "address of cloud server")
+	flag.StringVar(&CloudServer, "cloud", "https://cloud.de0gee.com", "address of cloud server")
 	flag.StringVar(&serverPort, "port", "8005", "port of login server")
 	flag.Parse()
 
@@ -36,6 +37,18 @@ func main() {
 		SetLogLevel("debug")
 	} else {
 		SetLogLevel("info")
+	}
+
+	log.Debug("starting server")
+	go startServer()
+
+	// wait until an API key exists
+	for {
+		if _, err := os.Stat("apikey"); err == nil {
+			// path/to/whatever exists
+			break
+		}
+		time.Sleep(1 * time.Second)
 	}
 
 	// log into the cloud
