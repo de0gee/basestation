@@ -18,6 +18,7 @@ var (
 	CloudServer     string
 	APIKey          string
 	addressOfDevice string
+	serverPort      string
 )
 
 func main() {
@@ -28,6 +29,7 @@ func main() {
 	flag.StringVar(&Username, "user", "", "username")
 	flag.StringVar(&Password, "pass", "", "passphrase")
 	flag.StringVar(&CloudServer, "cloud", "http://localhost:8002", "address of cloud server")
+	flag.StringVar(&serverPort, "port", "8005", "port of login server")
 	flag.Parse()
 
 	if doDebug {
